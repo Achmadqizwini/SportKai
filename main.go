@@ -2,11 +2,10 @@ package main
 
 import (
 	"fmt"
-
 	"github.com/Achmadqizwini/SportKai/config"
 	"github.com/Achmadqizwini/SportKai/factory"
 	"github.com/Achmadqizwini/SportKai/middlewares"
-	"github.com/Achmadqizwini/SportKai/utils/database/mysql"
+	"github.com/Achmadqizwini/SportKai/utils/database"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -14,8 +13,7 @@ import (
 
 func main() {
 	cfg := config.GetConfig()
-	db := mysql.InitDB(cfg)
-	// db := posgresql.InitDB(cfg)
+	db := database.InitDB(cfg)
 
 	e := echo.New()
 
@@ -27,5 +25,5 @@ func main() {
 	e.Use(middleware.CORS())
 	e.Use(middleware.Logger())
 
-	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", cfg.SERVER_PORT)))
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", cfg.AppConfig.AppPort)))
 }

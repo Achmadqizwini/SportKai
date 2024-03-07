@@ -1,79 +1,119 @@
 package config
 
 import (
-	"log"
 	"os"
 	"strconv"
-	"sync"
-
-	"github.com/joho/godotenv"
 )
 
+func GetConfig() *Config {
+	return &Config{
+		AppConfig: AppConfig{
+			AppHost: getEnv("APP_HOST", "localhost"),
+			AppPort: getEnvAsInt("APP_PORT", 8000),
+		},
+		DBconfig: DBconfig{
+			DB_DRIVER:   getEnv("DB_DRIVER", "mysql"),
+			DB_HOST:     getEnv("DB_HOST", "localhost"),
+			DB_PORT:     getEnvAsInt("DB_PORT", 3306),
+			DB_USERNAME: getEnv("DB_USER", "root"),
+			DB_PASSWORD: getEnv("DB_PASSWORD", ""),
+			DB_NAME:     getEnv("DB_NAME", "go-simple-template"),
+		},
+		CacheConfig: CacheConfig{
+			CacheDriver: getEnv("CACHE_DRIVER", "redis"),
+			Redis: Redis{
+				RedisHost:     getEnv("REDIS_HOST", "localhost"),
+				RedisPort:     getEnvAsInt("REDIS_PORT", 6379),
+				RedisDB:       getEnvAsInt("REDIS_DB", 0),
+				RedisPassword: getEnv("REDIS_PASSWORD", ""),
+			},
+		},
+		StorageConfig: StorageConfig{
+			StorageDriver: getEnv("STORAGE_DRIVER", "minio"),
+			Minio: Minio{
+				MinioEndpoint:        getEnv("MINIO_ENDPOINT", ""),
+				MinioAccessKeyID:     getEnv("MINIO_ACCESS_KEY_ID", ""),
+				MinioAccessKeySecret: getEnv("MINIO_ACCESS_KEY_SECRET", ""),
+				MinioBucketName:      getEnv("MINIO_BUCKET_NAME", ""),
+			},
+			GCS: GCS{
+				CredentialsFile: getEnv("GCS_CREDENTIALS_FILE", ""),
+				GCSBucketName:   getEnv("GCS_BUCKET_NAME", ""),
+			},
+		},
+	}
+}
+
+type Config struct {
+	AppConfig
+	DBconfig
+	CacheConfig
+	StorageConfig
+}
+
 type AppConfig struct {
+	AppName    string
+	AppVersion string
+	AppHost    string
+	AppPort    int
+}
+
+type DBconfig struct {
 	DB_DRIVER   string
 	DB_USERNAME string
 	DB_PASSWORD string
 	DB_HOST     string
-	DB_PORT     uint
+	DB_PORT     int
 	DB_NAME     string
-	SERVER_PORT uint
-	JWT_SECRET  string
 }
 
-var lock = &sync.Mutex{}
-var appConfig *AppConfig
-
-func GetConfig() *AppConfig {
-	lock.Lock()
-	defer lock.Unlock()
-
-	if appConfig == nil {
-		appConfig = initConfig()
-	}
-
-	return appConfig
+type CacheConfig struct {
+	CacheDriver string
+	Redis       Redis
 }
 
-func initConfig() *AppConfig {
-	var defaultConfig AppConfig
+type StorageConfig struct {
+	StorageDriver string
+	Minio         Minio
+	GCS           GCS
+}
 
-	if _, exist := os.LookupEnv("SECRET"); !exist {
-		if err := godotenv.Load(".env"); err != nil {
-			log.Println(err)
-		}
+type Minio struct {
+	MinioEndpoint        string
+	MinioAccessKeyID     string
+	MinioAccessKeySecret string
+	MinioBucketName      string
+}
+
+type GCS struct {
+	CredentialsFile string
+	GCSBucketName   string
+}
+
+type Redis struct {
+	RedisHost     string
+	RedisPort     int
+	RedisDB       int
+	RedisPassword string
+}
+
+func getEnv(key string, defaultVal string) string {
+	if value, exist := os.LookupEnv(key); exist {
+		return value
 	}
 
-	// SECRET = os.Getenv("SECRET")
-	cnvServerPort, err := strconv.Atoi(os.Getenv("SERVER_PORT"))
-	if err != nil {
-		log.Fatal("Cannot parse Server Port variable")
-		return nil
+	if nextValue := os.Getenv(key); nextValue != "" {
+		return nextValue
 	}
-	defaultConfig.SERVER_PORT = uint(cnvServerPort)
-	defaultConfig.DB_NAME = os.Getenv("DB_NAME")
-	defaultConfig.DB_USERNAME = os.Getenv("DB_USERNAME")
-	defaultConfig.DB_PASSWORD = os.Getenv("DB_PASSWORD")
-	defaultConfig.DB_HOST = os.Getenv("DB_HOST")
-	cnvDBPort, err := strconv.Atoi(os.Getenv("DB_PORT"))
-	if err != nil {
-		log.Fatal("Cannot parse DB Port variable")
-		return nil
+
+	return defaultVal
+}
+
+func getEnvAsInt(name string, defaultVal int) int {
+	valueStr := getEnv(name, "")
+	if value, err := strconv.Atoi(valueStr); err == nil {
+		return value
 	}
-	defaultConfig.DB_PORT = uint(cnvDBPort)
-	defaultConfig.JWT_SECRET = os.Getenv("JWT_SECRET")
 
-	// log.Println(` Env List :
-	//  - server port : `, defaultConfig.SERVER_PORT,
-	// 	` \n - db name : `, defaultConfig.DB_NAME,
-	// 	` \n - db username : `, defaultConfig.DB_USERNAME,
-	// 	` \n - db password : `, defaultConfig.DB_PASSWORD,
-	// 	` \n - db host : `, defaultConfig.DB_HOST,
-	// 	` \n - db port : `, defaultConfig.DB_PORT,
-	// 	` \n - jwt secret : `, defaultConfig.JWT_SECRET,
-	// 	` \n - AWS_REGION : `, os.Getenv("JWT_SECRET"),
-	// 	` \n - AWS_BUCKET_NAME : `, os.Getenv("AWS_BUCKET_NAME"),
-	// 	` \n - ACCESS_KEY_IAM : `, os.Getenv("ACCESS_KEY_IAM"),
-	// 	` \n - SECRET_KEY_IAM : `, os.Getenv("SECRET_KEY_IAM"))
-
-	return &defaultConfig
+	return defaultVal
 }
