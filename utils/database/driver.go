@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"log"
 
@@ -17,14 +16,14 @@ const (
 
 func InitDB(cfg *config.Config) *sql.DB {
 
-	switch cfg.DBconfig.DBdriver {
+	switch cfg.DBconfig.DB_DRIVER {
 	case driverMySQL:
-		dbConf := fmt.Sprintf(`%s:%s@tcp(%s:%s)/%s`,
-			cfg.DBconfig.DBuser,
-			cfg.DBconfig.DBpassword,
-			cfg.DBconfig.DBhost,
-			cfg.DBconfig.DBport,
-			cfg.DBconfig.DBname,
+		dbConf := fmt.Sprintf(`%s:%s@tcp(%s:%d)/%s`,
+			cfg.DBconfig.DB_USERNAME,
+			cfg.DBconfig.DB_PASSWORD,
+			cfg.DBconfig.DB_HOST,
+			cfg.DBconfig.DB_PORT,
+			cfg.DBconfig.DB_NAME,
 		)
 		dbConn, err := sql.Open(driverMySQL, dbConf)
 
