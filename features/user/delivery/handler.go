@@ -20,9 +20,6 @@ func New(service user.ServiceInterface, e *echo.Echo) {
 
 	e.POST("/users", handler.Create)
 
-	//middlewares.IsAdmin = untuk membatasi akses endpoint hanya admin
-	//middlewares.UserOnlySameId = untuk membatasi akses user mengelola data diri sendiri saja
-
 }
 
 func (delivery *UserDelivery) Create(c echo.Context) error {

@@ -18,9 +18,6 @@ type User struct {
 	Role            string
 }
 
-// mapping
-
-// mengubah struct core ke struct model gorm
 func fromCore(dataCore _user.Core) User {
 	userGorm := User{
 		FullName:        dataCore.FullName,
@@ -34,7 +31,6 @@ func fromCore(dataCore _user.Core) User {
 	return userGorm
 }
 
-// mengubah struct model gorm ke struct core
 func (dataModel *User) toCore() _user.Core {
 	return _user.Core{
 		ID:              dataModel.ID,
@@ -50,7 +46,6 @@ func (dataModel *User) toCore() _user.Core {
 	}
 }
 
-// mengubah slice struct model gorm ke slice struct core
 func toCoreList(dataModel []User) []_user.Core {
 	var dataCore []_user.Core
 	for _, v := range dataModel {
