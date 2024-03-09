@@ -14,8 +14,6 @@ type User struct {
 	Password        string `validate:"required"`
 	Phone           string `validate:"required"`
 	Gender          string
-	ProfileImageUrl string
-	Role            string
 }
 
 func fromCore(dataCore _user.Core) User {
@@ -25,8 +23,6 @@ func fromCore(dataCore _user.Core) User {
 		Password:        dataCore.Password,
 		Phone:           dataCore.Phone,
 		Gender:          dataCore.Gender,
-		ProfileImageUrl: dataCore.ProfileImageUrl,
-		Role:            dataCore.Role,
 	}
 	return userGorm
 }
@@ -39,8 +35,6 @@ func (dataModel *User) toCore() _user.Core {
 		Password:        dataModel.Password,
 		Phone:           dataModel.Phone,
 		Gender:          dataModel.Gender,
-		ProfileImageUrl: dataModel.ProfileImageUrl,
-		Role:            dataModel.Role,
 		CreatedAt:       dataModel.CreatedAt,
 		UpdatedAt:       dataModel.UpdatedAt,
 	}

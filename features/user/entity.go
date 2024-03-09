@@ -11,8 +11,6 @@ type Core struct {
 	Password        string `valiidate:"required"`
 	Phone           string `valiidate:"required"`
 	Gender          string
-	ProfileImageUrl string
-	Role            string
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 }

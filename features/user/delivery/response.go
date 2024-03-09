@@ -8,8 +8,6 @@ type UserResponse struct {
 	Email           string `json:"email"`
 	Phone           string `json:"phone"`
 	Gender          string `json:"gender"`
-	ProfileImageUrl string `json:"profile_image_url"`
-	Role            string `json:"role"`
 }
 
 func fromCore(dataCore user.Core) UserResponse {
@@ -19,8 +17,6 @@ func fromCore(dataCore user.Core) UserResponse {
 		Email:           dataCore.Email,
 		Phone:           dataCore.Phone,
 		Gender:          dataCore.Gender,
-		ProfileImageUrl: dataCore.ProfileImageUrl,
-		Role:            dataCore.Role,
 	}
 }
 

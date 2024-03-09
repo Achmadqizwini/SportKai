@@ -8,7 +8,6 @@ type InsertRequest struct {
 	Password        string `json:"password" form:"password"`
 	Phone           string `json:"phone" form:"phone"`
 	Gender          string `json:"gender" form:"gender"`
-	ProfileImageUrl string `json:"profile_image_url" form:"profile_image_url"`
 }
 
 type UpdateRequest struct {
@@ -18,7 +17,6 @@ type UpdateRequest struct {
 	Password        string `json:"password" form:"password"`
 	Phone           string `json:"phone" form:"phone"`
 	Gender          string `json:"gender" form:"gender"`
-	ProfileImageUrl string `json:"profile_image_url" form:"profile_image_url"`
 }
 
 func toCore(i interface{}) user.Core {
@@ -31,7 +29,6 @@ func toCore(i interface{}) user.Core {
 			Password:        cnv.Password,
 			Phone:           cnv.Phone,
 			Gender:          cnv.Gender,
-			ProfileImageUrl: cnv.ProfileImageUrl,
 		}
 
 	case UpdateRequest:
@@ -43,7 +40,6 @@ func toCore(i interface{}) user.Core {
 			Password:        cnv.Password,
 			Phone:           cnv.Phone,
 			Gender:          cnv.Gender,
-			ProfileImageUrl: cnv.ProfileImageUrl,
 		}
 	}
 
