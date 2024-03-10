@@ -4,26 +4,21 @@ import (
 	"fmt"
 	"github.com/Achmadqizwini/SportKai/config"
 	"github.com/Achmadqizwini/SportKai/factory"
-	"github.com/Achmadqizwini/SportKai/middlewares"
 	"github.com/Achmadqizwini/SportKai/utils/database"
-
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/gorilla/mux"
+	"net/http"
 )
 
 func main() {
 	cfg := config.GetConfig()
 	db := database.InitDB(cfg)
 
-	e := echo.New()
+	r := mux.NewRouter()
 
-	factory.InitFactory(e, db)
+	factory.InitFactory(r, db)
 
-	// middleware
-	middlewares.LogMiddlewares(e)
-	e.Pre(middleware.RemoveTrailingSlash())
-	e.Use(middleware.CORS())
-	e.Use(middleware.Logger())
-
-	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", cfg.AppConfig.AppPort)))
+	// Start the server
+	port := fmt.Sprintf(":%d", cfg.AppConfig.AppPort)
+	fmt.Printf("Server is running on port %s\n", port)
+	http.ListenAndServe(port, r)
 }

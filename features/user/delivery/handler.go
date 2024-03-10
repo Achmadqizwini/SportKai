@@ -1,37 +1,42 @@
 package delivery
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/Achmadqizwini/SportKai/features/user"
 	"github.com/Achmadqizwini/SportKai/utils/helper"
-
-	"github.com/labstack/echo/v4"
+	"github.com/gorilla/mux"
 )
 
 type UserDelivery struct {
 	userService user.ServiceInterface
 }
 
-func New(service user.ServiceInterface, e *echo.Echo) {
+func New(service user.ServiceInterface, r *mux.Router) {
 	handler := &UserDelivery{
 		userService: service,
 	}
 
-	e.POST("/users", handler.Create)
-
+	r.HandleFunc("/users", handler.Create).Methods("POST")
 }
 
-func (delivery *UserDelivery) Create(c echo.Context) error {
-	userInput := user.Core{}
-	errBind := c.Bind(&userInput)
-	if errBind != nil {
-		return c.JSON(http.StatusBadRequest, helper.FailedResponse("Error binding data "+errBind.Error()))
+func (delivery *UserDelivery) Create(w http.ResponseWriter, r *http.Request) {
+	var userInput user.Core
+	err := json.NewDecoder(r.Body).Decode(&userInput)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(helper.FailedResponse("Error binding data " + err.Error()))
+		return
 	}
 
-	err := delivery.userService.Create(userInput)
+	err = delivery.userService.Create(userInput)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, helper.FailedResponse("failed insert data"+err.Error()))
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(helper.FailedResponse("Failed to insert data " + err.Error()))
+		return
 	}
-	return c.JSON(http.StatusOK, helper.SuccessResponse("success create new users"))
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(helper.SuccessResponse("Success create new users"))
 }
