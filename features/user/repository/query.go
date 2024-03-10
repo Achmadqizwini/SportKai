@@ -1,7 +1,6 @@
 package repository
 
 import (
-
 	"database/sql"
 	"github.com/Achmadqizwini/SportKai/features/user"
 )
@@ -18,8 +17,7 @@ func New(db *sql.DB) user.RepositoryInterface {
 
 // Create implements user.Repository
 func (repo *userRepository) Create(input user.Core) (err error) {
-
-	_, errExec := repo.db.Exec(("Insert into mahasiswa (Username, Email) Values (?, ?)"), input.FullName, input.Email)
+	_, errExec := repo.db.Exec(("Insert into user (public_id, fullname, email, password, phone, gender) Values (1, ?, ?, ?, ?, ?)"), input.FullName, input.Email, input.Password, input.Phone, input.Gender)
 	if errExec != nil {
 		return errExec
 	}
