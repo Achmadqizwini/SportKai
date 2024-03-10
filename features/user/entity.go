@@ -6,6 +6,7 @@ import (
 
 type Core struct {
 	ID              uint
+	PublicId		string
 	FullName        string `valiidate:"required"`
 	Email           string `valiidate:"required,email"`
 	Password        string `valiidate:"required"`
