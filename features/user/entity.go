@@ -4,22 +4,22 @@ import (
 	"time"
 )
 
-type Core struct {
+type User struct {
 	ID              uint
-	PublicId		string
-	FullName        string `valiidate:"required"`
-	Email           string `valiidate:"required,email"`
-	Password        string `valiidate:"required"`
-	Phone           string `valiidate:"required"`
-	Gender          string
+	PublicId		string 
+	FullName        string `validate:"required" json:"fullname" form:"fullname"`
+	Email           string `validate:"required" json:"email" form:"email"`
+	Password        string `validate:"required" json:"password" form:"password"`
+	Phone           string `validate:"required" json:"phone" form:"phone"`
+	Gender          string `validate:"required" json:"gender" form:"gender"`
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 }
 
 type ServiceInterface interface {
-	Create(input Core) error
+	Create(input User) error
 }
 
 type RepositoryInterface interface {
-	Create(input Core) error
+	Create(input User) error
 }
