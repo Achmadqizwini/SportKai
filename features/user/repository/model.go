@@ -1,4 +1,4 @@
-// package repository
+package repository
 
 // import (
 // 	_user "github.com/Achmadqizwini/SportKai/features/user"
