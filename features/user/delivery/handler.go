@@ -6,19 +6,18 @@ import (
 
 	"github.com/Achmadqizwini/SportKai/features/user"
 	"github.com/Achmadqizwini/SportKai/utils/helper"
-	"github.com/gorilla/mux"
 )
 
 type UserDelivery struct {
 	userService user.ServiceInterface
 }
 
-func New(service user.ServiceInterface, r *mux.Router) {
+func New(service user.ServiceInterface, r *http.ServeMux) {
 	handler := &UserDelivery{
 		userService: service,
 	}
 
-	r.HandleFunc("/users", handler.Create).Methods("POST")
+	r.HandleFunc("POST /users", handler.Create)
 }
 
 func (delivery *UserDelivery) Create(w http.ResponseWriter, r *http.Request) {

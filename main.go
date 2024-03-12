@@ -5,7 +5,6 @@ import (
 	"github.com/Achmadqizwini/SportKai/config"
 	"github.com/Achmadqizwini/SportKai/factory"
 	"github.com/Achmadqizwini/SportKai/utils/database"
-	"github.com/gorilla/mux"
 	"net/http"
 )
 
@@ -13,7 +12,7 @@ func main() {
 	cfg := config.GetConfig()
 	db := database.InitDB(cfg)
 
-	r := mux.NewRouter()
+	r := http.NewServeMux()
 
 	factory.InitFactory(r, db)
 
