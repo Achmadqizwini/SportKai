@@ -23,7 +23,7 @@ func New(repo user.RepositoryInterface) user.ServiceInterface {
 }
 
 // Create implements user.ServiceInterface
-func (srv *userService) Create(input user.Core) (err error) {
+func (srv *userService) Create(input user.User) (err error) {
 	input.PublicId = uuid.NewString()
 	bytePass, errEncrypt := bcrypt.GenerateFromPassword([]byte(input.Password), 10)
 	if errEncrypt != nil {

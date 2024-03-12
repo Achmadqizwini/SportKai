@@ -21,7 +21,7 @@ func New(service user.ServiceInterface, r *http.ServeMux) {
 }
 
 func (delivery *UserDelivery) Create(w http.ResponseWriter, r *http.Request) {
-	var userInput user.Core
+	var userInput user.User
 	err := json.NewDecoder(r.Body).Decode(&userInput)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

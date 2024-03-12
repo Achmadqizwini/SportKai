@@ -10,7 +10,7 @@ type UserResponse struct {
 	Gender          string `json:"gender"`
 }
 
-func fromCore(dataCore user.Core) UserResponse {
+func fromCore(dataCore user.User) UserResponse {
 	return UserResponse{
 		ID:              dataCore.ID,
 		FullName:        dataCore.FullName,
@@ -20,7 +20,7 @@ func fromCore(dataCore user.Core) UserResponse {
 	}
 }
 
-func fromCoreList(dataCore []user.Core) []UserResponse {
+func fromCoreList(dataCore []user.User) []UserResponse {
 	var dataResponse []UserResponse
 	for _, v := range dataCore {
 		dataResponse = append(dataResponse, fromCore(v))

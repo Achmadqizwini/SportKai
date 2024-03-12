@@ -17,7 +17,7 @@ func New(db *sql.DB) user.RepositoryInterface {
 }
 
 // Create implements user.Repository
-func (repo *userRepository) Create(input user.Core) (err error) {
+func (repo *userRepository) Create(input user.User) (err error) {
 	_, errExec := repo.db.Exec(("Insert into user (public_id, fullname, email, password, phone, gender) Values (?, ?, ?, ?, ?, ?)"), input.PublicId, input.FullName, input.Email, input.Password, input.Phone, input.Gender)
 	if errExec != nil {
 		return errExec

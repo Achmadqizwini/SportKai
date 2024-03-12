@@ -19,11 +19,11 @@ type UpdateRequest struct {
 	Gender          string `json:"gender" form:"gender"`
 }
 
-func toCore(i interface{}) user.Core {
+func toCore(i interface{}) user.User {
 	switch i.(type) {
 	case InsertRequest:
 		cnv := i.(InsertRequest)
-		return user.Core{
+		return user.User{
 			FullName:        cnv.FullName,
 			Email:           cnv.Email,
 			Password:        cnv.Password,
@@ -33,7 +33,7 @@ func toCore(i interface{}) user.Core {
 
 	case UpdateRequest:
 		cnv := i.(UpdateRequest)
-		return user.Core{
+		return user.User{
 			ID:              cnv.ID,
 			FullName:        cnv.FullName,
 			Email:           cnv.Email,
@@ -43,5 +43,5 @@ func toCore(i interface{}) user.Core {
 		}
 	}
 
-	return user.Core{}
+	return user.User{}
 }
