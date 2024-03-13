@@ -7,6 +7,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"fmt"
 )
 
 type userService struct {
@@ -33,7 +34,7 @@ func (srv *userService) Create(input user.User) (err error) {
 	input.Password = string(bytePass)
 
 	if errCreate := srv.userRepository.Create(input); errCreate != nil {
-		return errors.New("failed insert data, error query")
+		return fmt.Errorf("failed to create new user: %v", err)
 	}
 	return nil
 }
@@ -42,21 +43,25 @@ func (srv *userService) Create(input user.User) (err error) {
 func (srv *userService) Get() ([]user.User, error) {
 	userData, err := srv.userRepository.Get()
 	if err != nil {
-		return nil, errors.New("failed insert data, error query")
+		return nil, fmt.Errorf("failed to retrieve user: %v", err)
 	}
 	return userData, nil
 }
 
 // Update implements user.ServiceInterface.
 func (srv *userService) Update(input user.User, id string) (user.User, error) {
-	panic("unimplemented")
+	updatedUser, err := srv.userRepository.Update(input, id)
+	if err != nil {
+		return user.User{}, fmt.Errorf("failed to update user: %v", err)
+	}
+	return updatedUser, nil
 }
 
 // Delete implements user.ServiceInterface.
 func (srv *userService) Delete(id string) error {
 	err := srv.userRepository.Delete(id)
 	if err != nil {
-		return errors.New("failed delete data, error query")
+		return fmt.Errorf("failed to delete user: %v", err)
 	}
 	return nil
 }

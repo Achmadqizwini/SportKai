@@ -12,7 +12,7 @@ type UserResponse struct {
 
 func getUserResponse(dataCore user.User) UserResponse {
 	return UserResponse{
-		PublicId:              dataCore.PublicId,
+		PublicId:        dataCore.PublicId,
 		FullName:        dataCore.FullName,
 		Email:           dataCore.Email,
 		Phone:           dataCore.Phone,

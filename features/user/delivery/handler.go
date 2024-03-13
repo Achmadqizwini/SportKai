@@ -2,7 +2,6 @@ package delivery
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -21,8 +20,8 @@ func New(service user.ServiceInterface, r *http.ServeMux) {
 
 	r.HandleFunc("POST /users", handler.CreateUser)
 	r.HandleFunc("GET /users", handler.GetUsers)
-	r.HandleFunc("PUT /users/{id}", handler.UpdateUser)
-	r.HandleFunc("DELETE /users/:id", handler.DeleteUser)
+	r.HandleFunc("PUT /users", handler.UpdateUser)
+	r.HandleFunc("DELETE /users", handler.DeleteUser)
 
 }
 
@@ -77,6 +76,7 @@ func (delivery *UserDelivery) GetUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (delivery *UserDelivery) UpdateUser(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get("id")
 	var userInput user.User
 	var err error
 	contentType := r.Header.Get("Content-Type")
@@ -101,15 +101,13 @@ func (delivery *UserDelivery) UpdateUser(w http.ResponseWriter, r *http.Request)
 		json.NewEncoder(w).Encode(helper.FailedResponse("Error binding data " + err.Error()))
 		return
 	}
-	id := r.URL.Query().Get("id")
-	// id := r.URL.()
-	fmt.Println(id)
-	updatedUser, err := delivery.userService.Update(userInput, id)
+	result, err := delivery.userService.Update(userInput, id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(helper.FailedResponse("Failed to update data " + err.Error()))
 		return
 	}
+	updatedUser := getUserResponse(result)
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(helper.SuccessWithDataResponse("Success update users", updatedUser))
@@ -118,7 +116,6 @@ func (delivery *UserDelivery) UpdateUser(w http.ResponseWriter, r *http.Request)
 func (delivery *UserDelivery) DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 	id := r.URL.Query().Get("id")
-	fmt.Println(id)
 	err := delivery.userService.Delete(id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/Achmadqizwini/SportKai/features/user"
 )
@@ -50,13 +51,43 @@ func (repo *userRepository) Get() ([]user.User, error) {
 
 // Update implements user.RepositoryInterface.
 func (repo *userRepository) Update(input user.User, id string) (user.User, error) {
-	panic("unimplemented")
+	stmt, err := repo.db.Prepare("UPDATE user SET fullname=?, email=?, password=?, phone=?, gender=? WHERE public_id=?")
+	if err != nil {
+		return user.User{}, fmt.Errorf("failed to prepare update statement: %v", err)
+	}
+	defer stmt.Close()
+
+	result, errExec := stmt.Exec(input.FullName, input.Email, input.Password, input.Phone, input.Gender, id)
+	if errExec != nil {
+		return user.User{}, errExec
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return user.User{}, fmt.Errorf("failed to get rows affected: %v", err)
+	}
+
+	if rowsAffected == 0 {
+		return user.User{}, fmt.Errorf("no user found with id %s", id)
+	}
+	userData := user.User{}
+    row := repo.db.QueryRow("SELECT public_id, fullname, email, phone, gender FROM user WHERE public_id=?", id)
+
+    err = row.Scan(&userData.PublicId, &userData.FullName, &userData.Email, &userData.Phone, &userData.Gender)
+    if err != nil {
+        if err == sql.ErrNoRows {
+            return user.User{}, fmt.Errorf("no user found with id %s", id)
+        }
+        return user.User{}, fmt.Errorf("failed to scan row: %v", err)
+    }
+
+	return userData, nil
 }
 
 
 // Delete implements user.RepositoryInterface.
 func (repo *userRepository) Delete(id string) error {
-	_, errExec := repo.db.Query(("Delete from user where id = ?"), id)
+	_, errExec := repo.db.Query(("Delete from user where public_id = ?"), id)
 	if errExec != nil {
 		return errExec
 	}
