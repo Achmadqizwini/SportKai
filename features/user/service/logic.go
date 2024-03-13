@@ -29,7 +29,7 @@ func (srv *userService) Create(input user.User) (err error) {
 	if errEncrypt != nil {
 		return errors.New("failed insert data, error query")
 	}
-	
+
 	input.Password = string(bytePass)
 
 	if errCreate := srv.userRepository.Create(input); errCreate != nil {
@@ -45,4 +45,18 @@ func (srv *userService) Get() ([]user.User, error) {
 		return nil, errors.New("failed insert data, error query")
 	}
 	return userData, nil
+}
+
+// Update implements user.ServiceInterface.
+func (srv *userService) Update(input user.User, id string) (user.User, error) {
+	panic("unimplemented")
+}
+
+// Delete implements user.ServiceInterface.
+func (srv *userService) Delete(id string) error {
+	err := srv.userRepository.Delete(id)
+	if err != nil {
+		return errors.New("failed delete data, error query")
+	}
+	return nil
 }
