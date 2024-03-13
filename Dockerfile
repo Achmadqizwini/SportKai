@@ -1,17 +1,13 @@
-FROM golang:1.17.7-alpine as build
+FROM golang:1.22.1-alpine3.19 as build
 
-# buat direktori app
-RUN mkdir /app
-
-# set working dir
 WORKDIR /app
 
 COPY ./ /app
 
 RUN go mod tidy
 
-RUN go build -o capstone-alta1
+RUN go build -o sport_kai
 
-EXPOSE 80
+EXPOSE 8080
 
-CMD [ "./capstone-alta1" ]
+CMD [ "./sport_kai" ]
