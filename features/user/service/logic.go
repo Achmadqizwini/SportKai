@@ -7,13 +7,13 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
-	
 )
 
 type userService struct {
 	userRepository user.RepositoryInterface
 	validate       *validator.Validate
 }
+
 
 func New(repo user.RepositoryInterface) user.ServiceInterface {
 	return &userService{
@@ -29,11 +29,20 @@ func (srv *userService) Create(input user.User) (err error) {
 	if errEncrypt != nil {
 		return errors.New("failed insert data, error query")
 	}
-
+	
 	input.Password = string(bytePass)
 
 	if errCreate := srv.userRepository.Create(input); errCreate != nil {
 		return errors.New("failed insert data, error query")
 	}
 	return nil
+}
+
+// Get implements user.ServiceInterface.
+func (srv *userService) Get() ([]user.User, error) {
+	userData, err := srv.userRepository.Get()
+	if err != nil {
+		return nil, errors.New("failed insert data, error query")
+	}
+	return userData, nil
 }

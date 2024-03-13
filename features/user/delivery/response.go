@@ -3,16 +3,16 @@ package delivery
 import "github.com/Achmadqizwini/SportKai/features/user"
 
 type UserResponse struct {
-	ID              uint   `json:"id"`
-	FullName        string `json:"full_name"`
+	PublicId        string `json:"id"`
+	FullName        string `json:"fullname"`
 	Email           string `json:"email"`
 	Phone           string `json:"phone"`
 	Gender          string `json:"gender"`
 }
 
-func fromCore(dataCore user.User) UserResponse {
+func getUserResponse(dataCore user.User) UserResponse {
 	return UserResponse{
-		ID:              dataCore.ID,
+		PublicId:              dataCore.PublicId,
 		FullName:        dataCore.FullName,
 		Email:           dataCore.Email,
 		Phone:           dataCore.Phone,
@@ -20,10 +20,10 @@ func fromCore(dataCore user.User) UserResponse {
 	}
 }
 
-func fromCoreList(dataCore []user.User) []UserResponse {
+func getUserResponseList(dataCore []user.User) []UserResponse {
 	var dataResponse []UserResponse
 	for _, v := range dataCore {
-		dataResponse = append(dataResponse, fromCore(v))
+		dataResponse = append(dataResponse, getUserResponse(v))
 	}
 	return dataResponse
 }

@@ -18,8 +18,10 @@ type User struct {
 
 type ServiceInterface interface {
 	Create(input User) error
+	Get() ([]User, error)
 }
 
 type RepositoryInterface interface {
 	Create(input User) error
+	Get() ([]User, error)
 }
