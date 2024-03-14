@@ -1,10 +1,8 @@
 package service
 
 import (
-	"errors"
-
-	"fmt"
 	"github.com/Achmadqizwini/SportKai/features/user"
+	"github.com/Achmadqizwini/SportKai/utils/logger"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -16,7 +14,6 @@ type userService struct {
 }
 
 
-
 func New(repo user.RepositoryInterface) user.ServiceInterface {
 	return &userService{
 		userRepository: repo,
@@ -24,18 +21,23 @@ func New(repo user.RepositoryInterface) user.ServiceInterface {
 	}
 }
 
+var (
+	logService = logger.NewLogger().Logger.With().Logger()
+)
+
 // Create implements user.ServiceInterface
 func (srv *userService) Create(input user.User) (err error) {
 	input.PublicId = uuid.NewString()
 	bytePass, errEncrypt := bcrypt.GenerateFromPassword([]byte(input.Password), 10)
 	if errEncrypt != nil {
-		return errors.New("failed insert data, error query")
+		return errEncrypt
 	}
 
 	input.Password = string(bytePass)
 
 	if errCreate := srv.userRepository.Create(input); errCreate != nil {
-		return fmt.Errorf("failed to create new user: %v", err)
+		logService.Error().Err(err).Msg("failed to create new user")
+		return errCreate
 	}
 	return nil
 }
@@ -44,7 +46,8 @@ func (srv *userService) Create(input user.User) (err error) {
 func (srv *userService) Get() ([]user.User, error) {
 	userData, err := srv.userRepository.Get()
 	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve user: %v", err)
+		logService.Error().Err(err).Msg("failed to retrieve users")
+		return nil, err
 	}
 	return userData, nil
 }
@@ -53,7 +56,8 @@ func (srv *userService) Get() ([]user.User, error) {
 func (srv *userService) Update(input user.User, id string) (user.User, error) {
 	updatedUser, err := srv.userRepository.Update(input, id)
 	if err != nil {
-		return user.User{}, fmt.Errorf("failed to update user: %v", err)
+		logService.Error().Err(err).Msg("failed to update user")
+		return user.User{}, err
 	}
 	return updatedUser, nil
 }
@@ -62,7 +66,8 @@ func (srv *userService) Update(input user.User, id string) (user.User, error) {
 func (srv *userService) Delete(id string) error {
 	err := srv.userRepository.Delete(id)
 	if err != nil {
-		return fmt.Errorf("failed to delete user: %v", err)
+		logService.Error().Err(err).Msg("failed to delete user")
+		return err
 	}
 	return nil
 }
@@ -71,7 +76,8 @@ func (srv *userService) Delete(id string) error {
 func (srv *userService) GetById(id string) (user.User, error) {
 	res, err := srv.userRepository.GetById(id)
 	if err != nil {
-		return user.User{}, fmt.Errorf("failed to get user by id: %v", err)
+		logService.Error().Err(err).Msg("failed to get user by id")
+		return user.User{}, err
 	}
 	return res, nil
 }
