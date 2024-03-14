@@ -19,7 +19,11 @@ func main() {
 		panic(err)
 	}
 	cfg := config.GetConfig()
-	db := database.InitDB(cfg)
+	db, err := database.InitDB(cfg)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to connect to database")
+		panic(err)
+	}
 
 	r := http.NewServeMux()
 
@@ -28,7 +32,7 @@ func main() {
 	// Start the server
 	port := fmt.Sprintf(":%d", cfg.AppConfig.AppPort)
 	fmt.Printf("Server is running on port %s\n", port)
-	if err:= http.ListenAndServe(port, r); err != nil {
+	if err := http.ListenAndServe(port, r); err != nil {
 		log.Fatal().Err(err).Msg("Failed to start server")
 	}
 }

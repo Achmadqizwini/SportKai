@@ -9,6 +9,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.11.4
+	github.com/lib/pq v1.10.9
 	github.com/midtrans/midtrans-go v1.3.7
 	github.com/rs/zerolog v1.32.0
 	golang.org/x/crypto v0.21.0
