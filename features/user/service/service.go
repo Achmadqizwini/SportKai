@@ -26,7 +26,11 @@ var (
 )
 
 // Create implements user.ServiceInterface
-func (srv *userService) Create(input user.User) (err error) {
+func (svc *userService) Create(input user.User) (err error) {
+	if errValidate := svc.validate.Struct(input); errValidate != nil {
+		logService.Error().Err(errValidate).Msg("error validate input, please check your input")
+		return errValidate
+	}
 	input.PublicId = uuid.NewString()
 	bytePass, errEncrypt := bcrypt.GenerateFromPassword([]byte(input.Password), 10)
 	if errEncrypt != nil {
@@ -35,7 +39,7 @@ func (srv *userService) Create(input user.User) (err error) {
 
 	input.Password = string(bytePass)
 
-	if errCreate := srv.userRepository.Create(input); errCreate != nil {
+	if errCreate := svc.userRepository.Create(input); errCreate != nil {
 		logService.Error().Err(err).Msg("failed to create new user")
 		return errCreate
 	}
@@ -43,8 +47,8 @@ func (srv *userService) Create(input user.User) (err error) {
 }
 
 // Get implements user.ServiceInterface.
-func (srv *userService) Get() ([]user.User, error) {
-	userData, err := srv.userRepository.Get()
+func (svc *userService) Get() ([]user.User, error) {
+	userData, err := svc.userRepository.Get()
 	if err != nil {
 		logService.Error().Err(err).Msg("failed to retrieve users")
 		return nil, err
@@ -53,8 +57,8 @@ func (srv *userService) Get() ([]user.User, error) {
 }
 
 // Update implements user.ServiceInterface.
-func (srv *userService) Update(input user.User, id string) (user.User, error) {
-	updatedUser, err := srv.userRepository.Update(input, id)
+func (svc *userService) Update(input user.User, id string) (user.User, error) {
+	updatedUser, err := svc.userRepository.Update(input, id)
 	if err != nil {
 		logService.Error().Err(err).Msg("failed to update user")
 		return user.User{}, err
@@ -63,8 +67,8 @@ func (srv *userService) Update(input user.User, id string) (user.User, error) {
 }
 
 // Delete implements user.ServiceInterface.
-func (srv *userService) Delete(id string) error {
-	err := srv.userRepository.Delete(id)
+func (svc *userService) Delete(id string) error {
+	err := svc.userRepository.Delete(id)
 	if err != nil {
 		logService.Error().Err(err).Msg("failed to delete user")
 		return err
@@ -73,8 +77,8 @@ func (srv *userService) Delete(id string) error {
 }
 
 // GetById implements user.ServiceInterface.
-func (srv *userService) GetById(id string) (user.User, error) {
-	res, err := srv.userRepository.GetById(id)
+func (svc *userService) GetById(id string) (user.User, error) {
+	res, err := svc.userRepository.GetById(id)
 	if err != nil {
 		logService.Error().Err(err).Msg("failed to get user by id")
 		return user.User{}, err
