@@ -21,11 +21,18 @@ func New(db *sql.DB) user.RepositoryInterface {
 
 // Create implements user.Repository
 func (repo *userRepository) Create(input user.User) (err error) {
-	_, errExec := repo.db.Exec(("Insert into user (public_id, fullname, email, password, phone, gender) Values (?, ?, ?, ?, ?, ?)"), input.PublicId, input.FullName, input.Email, input.Password, input.Phone, input.Gender)
-	if errExec != nil {
-		return errExec
-	}
-	return nil
+    stmt, errPrepare := repo.db.Prepare("INSERT INTO user (public_id, fullname, email, password, phone, gender) VALUES (?, ?, ?, ?, ?, ?)")
+    if errPrepare != nil {
+        return errPrepare
+    }
+    defer stmt.Close()
+
+    _, errExec := stmt.Exec(input.PublicId, input.FullName, input.Email, input.Password, input.Phone, input.Gender)
+    if errExec != nil {
+        return errExec
+    }
+
+    return nil
 }
 
 // Get implements user.RepositoryInterface.
@@ -71,25 +78,47 @@ func (repo *userRepository) Update(input user.User, id string) (user.User, error
 		return user.User{}, fmt.Errorf("no user found with id %s", id)
 	}
 	userData := user.User{}
-    row := repo.db.QueryRow("SELECT public_id, fullname, email, phone, gender FROM user WHERE public_id=?", id)
+	row := repo.db.QueryRow("SELECT public_id, fullname, email, phone, gender FROM user WHERE public_id=?", id)
 
-    err = row.Scan(&userData.PublicId, &userData.FullName, &userData.Email, &userData.Phone, &userData.Gender)
-    if err != nil {
-        if err == sql.ErrNoRows {
-            return user.User{}, fmt.Errorf("no user found with id %s", id)
-        }
-        return user.User{}, fmt.Errorf("failed to scan row: %v", err)
-    }
+	err = row.Scan(&userData.PublicId, &userData.FullName, &userData.Email, &userData.Phone, &userData.Gender)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return user.User{}, fmt.Errorf("no user found with id %s", id)
+		}
+		return user.User{}, fmt.Errorf("failed to scan row: %v", err)
+	}
 
 	return userData, nil
 }
 
-
 // Delete implements user.RepositoryInterface.
 func (repo *userRepository) Delete(id string) error {
-	_, errExec := repo.db.Query(("Delete from user where public_id = ?"), id)
-	if errExec != nil {
-		return errExec
+    stmt, errPrepare := repo.db.Prepare("DELETE FROM user WHERE public_id = ?")
+    if errPrepare != nil {
+        return errPrepare
+    }
+    defer stmt.Close()
+
+    _, errExec := stmt.Exec(id)
+    if errExec != nil {
+        return errExec
+    }
+
+    return nil
+}
+
+// GetById implements user.RepositoryInterface.
+func (repo *userRepository) GetById(id string) (user.User, error) {
+	userData := user.User{}
+	row := repo.db.QueryRow("select public_id, fullname, email, phone, gender from user where public_id=?", id)
+
+	err := row.Scan(&userData.PublicId, &userData.FullName, &userData.Email, &userData.Phone, &userData.Gender)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return user.User{}, fmt.Errorf("no user found with id %s", id)
+		}
+		return user.User{}, fmt.Errorf("failed to scan row: %v", err)
 	}
-	return nil
+
+	return userData, nil
 }

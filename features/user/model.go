@@ -19,6 +19,7 @@ type User struct {
 type ServiceInterface interface {
 	Create(input User) error
 	Get() ([]User, error)
+	GetById(id string) (User, error)
 	Update(input User, id string) (User, error)
 	Delete(id string) error 
 }
@@ -26,6 +27,7 @@ type ServiceInterface interface {
 type RepositoryInterface interface {
 	Create(input User) error
 	Get() ([]User, error)
+	GetById(id string) (User, error)
 	Update(input User, id string) (User, error)
 	Delete(id string) error 
 }

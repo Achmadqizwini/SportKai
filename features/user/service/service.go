@@ -3,17 +3,18 @@ package service
 import (
 	"errors"
 
+	"fmt"
 	"github.com/Achmadqizwini/SportKai/features/user"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
-	"fmt"
 )
 
 type userService struct {
 	userRepository user.RepositoryInterface
 	validate       *validator.Validate
 }
+
 
 
 func New(repo user.RepositoryInterface) user.ServiceInterface {
@@ -64,4 +65,13 @@ func (srv *userService) Delete(id string) error {
 		return fmt.Errorf("failed to delete user: %v", err)
 	}
 	return nil
+}
+
+// GetById implements user.ServiceInterface.
+func (srv *userService) GetById(id string) (user.User, error) {
+	res, err := srv.userRepository.GetById(id)
+	if err != nil {
+		return user.User{}, fmt.Errorf("failed to get user by id: %v", err)
+	}
+	return res, nil
 }

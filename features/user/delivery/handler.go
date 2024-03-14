@@ -20,8 +20,9 @@ func New(service user.ServiceInterface, r *http.ServeMux) {
 
 	r.HandleFunc("POST /users", handler.CreateUser)
 	r.HandleFunc("GET /users", handler.GetUsers)
-	r.HandleFunc("PUT /users", handler.UpdateUser)
-	r.HandleFunc("DELETE /users", handler.DeleteUser)
+	r.HandleFunc("PUT /users/{id}", handler.UpdateUser)
+	r.HandleFunc("DELETE /users/{id}", handler.DeleteUser)
+	r.HandleFunc("GET /users/{id}", handler.GetUserById)
 
 }
 
@@ -76,7 +77,7 @@ func (delivery *UserDelivery) GetUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (delivery *UserDelivery) UpdateUser(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("id")
+	id := r.PathValue("id")
 	var userInput user.User
 	var err error
 	contentType := r.Header.Get("Content-Type")
@@ -115,7 +116,7 @@ func (delivery *UserDelivery) UpdateUser(w http.ResponseWriter, r *http.Request)
 
 func (delivery *UserDelivery) DeleteUser(w http.ResponseWriter, r *http.Request) {
 
-	id := r.URL.Query().Get("id")
+	id := r.PathValue("id")
 	err := delivery.userService.Delete(id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -125,4 +126,19 @@ func (delivery *UserDelivery) DeleteUser(w http.ResponseWriter, r *http.Request)
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(helper.SuccessResponse("Success delete users"))
+}
+
+func (delivery *UserDelivery) GetUserById(w http.ResponseWriter, r *http.Request) {
+
+	id := r.PathValue("id")
+	res, err := delivery.userService.GetById(id)
+	userData := getUserResponse(res)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(helper.FailedResponse("Failed to delete data " + err.Error()))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(helper.SuccessWithDataResponse("Success retrieve user", userData))
 }
