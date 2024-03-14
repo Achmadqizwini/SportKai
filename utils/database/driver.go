@@ -28,14 +28,12 @@ func InitDB(cfg *config.Config) *sql.DB {
 		dbConn, err := sql.Open(driverMySQL, dbConf)
 
 		if err != nil {
-			// log.Error().Err(err).Str("dsn", dsn).Msg("failed to connect to database")
-			log.Fatal("error open connection", err.Error())
-
+			log.Fatal("Error open connection", err.Error())
 			return nil
 		}
 		errPing := dbConn.Ping()
 		if errPing != nil {
-			log.Fatal("error connect to db", errPing.Error())
+			log.Fatal("Error connect to db", errPing.Error())
 		} else {
 			fmt.Println("Database Connection Success ")
 		}

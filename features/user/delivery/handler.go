@@ -55,7 +55,7 @@ func (delivery *UserDelivery) CreateUser(w http.ResponseWriter, r *http.Request)
 	err = delivery.userService.Create(userInput)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(helper.FailedResponse("Failed to insert data " + err.Error()))
+		json.NewEncoder(w).Encode(helper.FailedResponse("Failed to insert data: " + err.Error()))
 		return
 	}
 
@@ -68,7 +68,7 @@ func (delivery *UserDelivery) GetUsers(w http.ResponseWriter, r *http.Request) {
 	data := getUserResponseList(users)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(helper.FailedResponse("Failed to retrieve data " + err.Error()))
+		json.NewEncoder(w).Encode(helper.FailedResponse("Failed to retrieve data: " + err.Error()))
 		return
 	} else {
 		w.WriteHeader(http.StatusOK)
@@ -99,13 +99,13 @@ func (delivery *UserDelivery) UpdateUser(w http.ResponseWriter, r *http.Request)
 	}
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(helper.FailedResponse("Error binding data " + err.Error()))
+		json.NewEncoder(w).Encode(helper.FailedResponse("Error binding data. " + err.Error()))
 		return
 	}
 	result, err := delivery.userService.Update(userInput, id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(helper.FailedResponse("Failed to update data " + err.Error()))
+		json.NewEncoder(w).Encode(helper.FailedResponse("Failed to update data: " + err.Error()))
 		return
 	}
 	updatedUser := getUserResponse(result)
@@ -120,7 +120,7 @@ func (delivery *UserDelivery) DeleteUser(w http.ResponseWriter, r *http.Request)
 	err := delivery.userService.Delete(id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(helper.FailedResponse("Failed to delete data " + err.Error()))
+		json.NewEncoder(w).Encode(helper.FailedResponse("Failed to delete data: " + err.Error()))
 		return
 	}
 
@@ -135,7 +135,7 @@ func (delivery *UserDelivery) GetUserById(w http.ResponseWriter, r *http.Request
 	userData := getUserResponse(res)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(helper.FailedResponse("Failed to delete data " + err.Error()))
+		json.NewEncoder(w).Encode(helper.FailedResponse("Failed to retrieve user: " + err.Error()))
 		return
 	}
 

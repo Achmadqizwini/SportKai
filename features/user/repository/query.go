@@ -3,8 +3,6 @@ package repository
 import (
 	"database/sql"
 	"errors"
-	"fmt"
-
 	"github.com/Achmadqizwini/SportKai/features/user"
 )
 
@@ -23,13 +21,13 @@ func New(db *sql.DB) user.RepositoryInterface {
 func (repo *userRepository) Create(input user.User) (err error) {
     stmt, errPrepare := repo.db.Prepare("INSERT INTO user (public_id, fullname, email, password, phone, gender) VALUES (?, ?, ?, ?, ?, ?)")
     if errPrepare != nil {
-        return errPrepare
+        return errors.New("error prepare query statement")
     }
     defer stmt.Close()
 
     _, errExec := stmt.Exec(input.PublicId, input.FullName, input.Email, input.Password, input.Phone, input.Gender)
     if errExec != nil {
-        return errExec
+        return errors.New("error query execution")
     }
 
     return nil
@@ -40,7 +38,7 @@ func (repo *userRepository) Get() ([]user.User, error) {
 	userData := []user.User{}
 	rows, err := repo.db.Query("select public_id, fullname, email, phone, gender from user")
 	if err != nil {
-		return nil, err
+		return nil, errors.New("error query")
 	}
 	defer rows.Close()
 
@@ -48,7 +46,7 @@ func (repo *userRepository) Get() ([]user.User, error) {
 		var u user.User
 		err := rows.Scan(&u.PublicId, &u.FullName, &u.Email, &u.Phone, &u.Gender)
 		if err != nil {
-			return nil, errors.New("failed retrieve data, error query")
+			return nil, errors.New("error parsing data to model")
 		}
 		userData = append(userData, u)
 	}
@@ -60,32 +58,24 @@ func (repo *userRepository) Get() ([]user.User, error) {
 func (repo *userRepository) Update(input user.User, id string) (user.User, error) {
 	stmt, err := repo.db.Prepare("UPDATE user SET fullname=?, email=?, password=?, phone=?, gender=? WHERE public_id=?")
 	if err != nil {
-		return user.User{}, fmt.Errorf("failed to prepare update statement: %v", err)
+		return user.User{}, errors.New("error query prepare statement")
 	}
 	defer stmt.Close()
 
 	result, errExec := stmt.Exec(input.FullName, input.Email, input.Password, input.Phone, input.Gender, id)
 	if errExec != nil {
-		return user.User{}, errExec
+		return user.User{}, errors.New("error query execution")
+	}
+	if row, err := result.RowsAffected(); row == 0 || err != nil{
+		return user.User{}, errors.New("update failed, no rows affected")
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return user.User{}, fmt.Errorf("failed to get rows affected: %v", err)
-	}
-
-	if rowsAffected == 0 {
-		return user.User{}, fmt.Errorf("no user found with id %s", id)
-	}
 	userData := user.User{}
 	row := repo.db.QueryRow("SELECT public_id, fullname, email, phone, gender FROM user WHERE public_id=?", id)
 
 	err = row.Scan(&userData.PublicId, &userData.FullName, &userData.Email, &userData.Phone, &userData.Gender)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return user.User{}, fmt.Errorf("no user found with id %s", id)
-		}
-		return user.User{}, fmt.Errorf("failed to scan row: %v", err)
+		return user.User{}, errors.New("error parsing data to model")
 	}
 
 	return userData, nil
@@ -95,11 +85,14 @@ func (repo *userRepository) Update(input user.User, id string) (user.User, error
 func (repo *userRepository) Delete(id string) error {
     stmt, errPrepare := repo.db.Prepare("DELETE FROM user WHERE public_id = ?")
     if errPrepare != nil {
-        return errPrepare
+        return  errors.New("error prepare query statement")
     }
     defer stmt.Close()
 
-    _, errExec := stmt.Exec(id)
+    res, errExec := stmt.Exec(id)
+	if row, err := res.RowsAffected(); row == 0 || err != nil {
+		return errors.New("no user found")
+	}
     if errExec != nil {
         return errExec
     }
@@ -115,9 +108,9 @@ func (repo *userRepository) GetById(id string) (user.User, error) {
 	err := row.Scan(&userData.PublicId, &userData.FullName, &userData.Email, &userData.Phone, &userData.Gender)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return user.User{}, fmt.Errorf("no user found with id %s", id)
+			return user.User{},  errors.New("no user found")
 		}
-		return user.User{}, fmt.Errorf("failed to scan row: %v", err)
+		return user.User{}, errors.New("error parsing to model")
 	}
 
 	return userData, nil
