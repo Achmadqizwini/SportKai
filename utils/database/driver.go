@@ -16,7 +16,7 @@ const (
 
 func InitDB(cfg *config.Config) (*sql.DB, error) {
 	var db *sql.DB
-    var err error
+	var err error
 
 	switch cfg.DBconfig.DB_DRIVER {
 	case driverMySQL:
@@ -43,17 +43,17 @@ func InitDB(cfg *config.Config) (*sql.DB, error) {
 
 	}
 
-    if err != nil {
-        return nil, fmt.Errorf("error opening connection: %v", err)
-    }
+	if err != nil {
+		return nil, fmt.Errorf("error opening connection: %v", err)
+	}
 
-    errPing := db.Ping()
-    if errPing != nil {
-        db.Close()
-        return nil, fmt.Errorf("error connecting to database: %v", errPing)
-    }
+	errPing := db.Ping()
+	if errPing != nil {
+		db.Close()
+		return nil, fmt.Errorf("error connecting to database: %v", errPing)
+	}
 
-    fmt.Println("Database Connection Success")
-    return db, nil
+	fmt.Println("Database Connection Success")
+	return db, nil
 
 }

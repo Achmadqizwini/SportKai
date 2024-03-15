@@ -32,7 +32,7 @@ func (delivery *UserDelivery) CreateUser(w http.ResponseWriter, r *http.Request)
 	contentType := r.Header.Get("Content-Type")
 	if strings.HasPrefix(contentType, "application/json") {
 		err = json.NewDecoder(r.Body).Decode(&userInput)
-	} else if strings.HasPrefix(contentType, "application/x-www-form-urlencoded") || strings.HasPrefix(contentType, "multipart/form-data"){
+	} else if strings.HasPrefix(contentType, "application/x-www-form-urlencoded") || strings.HasPrefix(contentType, "multipart/form-data") {
 		err = r.ParseForm()
 		if err == nil {
 			userInput.FullName = r.Form.Get("fullname")
@@ -83,7 +83,7 @@ func (delivery *UserDelivery) UpdateUser(w http.ResponseWriter, r *http.Request)
 	contentType := r.Header.Get("Content-Type")
 	if strings.HasPrefix(contentType, "application/json") {
 		err = json.NewDecoder(r.Body).Decode(&userInput)
-	} else if strings.HasPrefix(contentType, "application/x-www-form-urlencoded") || strings.HasPrefix(contentType, "multipart/form-data"){
+	} else if strings.HasPrefix(contentType, "application/x-www-form-urlencoded") || strings.HasPrefix(contentType, "multipart/form-data") {
 		err = r.ParseForm()
 		if err == nil {
 			userInput.FullName = r.Form.Get("fullname")
