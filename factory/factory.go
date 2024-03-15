@@ -1,10 +1,18 @@
 package factory
 
 import (
+	"database/sql"
 	userDelivery "github.com/Achmadqizwini/SportKai/features/user/delivery"
 	userRepo "github.com/Achmadqizwini/SportKai/features/user/repository"
 	userService "github.com/Achmadqizwini/SportKai/features/user/service"
-	"database/sql"
+
+	clubDelivery "github.com/Achmadqizwini/SportKai/features/club/delivery"
+	clubRepo "github.com/Achmadqizwini/SportKai/features/club/repository"
+	clubService "github.com/Achmadqizwini/SportKai/features/club/service"
+
+	memberDelivery "github.com/Achmadqizwini/SportKai/features/clubMember/delivery"
+	memberRepo "github.com/Achmadqizwini/SportKai/features/clubMember/repository"
+	memberService "github.com/Achmadqizwini/SportKai/features/clubMember/service"
 	"net/http"
 )
 
@@ -12,5 +20,13 @@ func InitFactory(r *http.ServeMux, db *sql.DB) {
 	userRepoFactory := userRepo.New(db)
 	userServiceFactory := userService.New(userRepoFactory)
 	userDelivery.New(userServiceFactory, r)
+
+	clubRepoFactory := clubRepo.New(db)
+	clubServiceFactory := clubService.New(clubRepoFactory)
+	clubDelivery.New(clubServiceFactory, r)
+
+	memberRepoFactory := memberRepo.New(db)
+	memberServiceFactory := memberService.New(memberRepoFactory)
+	memberDelivery.New(memberServiceFactory, r)
 
 }
