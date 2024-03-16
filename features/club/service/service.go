@@ -37,7 +37,6 @@ func (c *clubService) Create(input model.Club) error {
 		return errValidate
 	}
 	input.PublicId = uuid.NewString()
-	input.JoinedMember = 1
 	if err := c.clubRepository.Create(input); err != nil {
 		logService.Error().Err(err).Msg("failed to create new club")
 		return err
