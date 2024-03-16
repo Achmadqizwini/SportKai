@@ -1,1 +1,2 @@
+DROP TABLE IF EXISTS club_member
 DROP TABLE IF EXISTS club
