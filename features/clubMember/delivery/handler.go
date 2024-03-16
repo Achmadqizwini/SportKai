@@ -2,7 +2,9 @@ package delivery
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/Achmadqizwini/SportKai/features/clubMember/model"
@@ -36,8 +38,8 @@ func (delivery *ClubDelivery) CreateMember(w http.ResponseWriter, r *http.Reques
 	} else if strings.HasPrefix(contentType, "application/x-www-form-urlencoded") || strings.HasPrefix(contentType, "multipart/form-data") {
 		err = r.ParseForm()
 		if err == nil {
-			clubInput.UserId = r.Form.Get("user_id")
-			clubInput.ClubId = r.Form.Get("club_id")
+			clubInput.UserId, _ = strconv.Atoi(r.Form.Get("user_id"))
+			clubInput.ClubId, _ = strconv.Atoi(r.Form.Get("club_id"))
 			clubInput.Status = r.Form.Get("status")
 		}
 	} else {
@@ -51,6 +53,8 @@ func (delivery *ClubDelivery) CreateMember(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	fmt.Println(clubInput)
+
 	err = delivery.clubService.Create(clubInput)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -59,5 +63,5 @@ func (delivery *ClubDelivery) CreateMember(w http.ResponseWriter, r *http.Reques
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(helper.SuccessResponse("Success create new users"))
+	json.NewEncoder(w).Encode(helper.SuccessResponse("Success create new club member"))
 }

@@ -3,6 +3,10 @@ package repository
 import (
 	"database/sql"
 	"errors"
+	"fmt"
+
+	"github.com/Achmadqizwini/SportKai/utils/logger"
+
 	model "github.com/Achmadqizwini/SportKai/features/clubMember/model"
 )
 
@@ -24,9 +28,12 @@ func New(db *sql.DB) RepositoryInterface {
 	}
 }
 
+var logRepo = logger.NewLogger().Logger.With().Logger()
+
 // Create implements RepositoryInterface.
 func (u *memberRepository) Create(input model.ClubMember) error {
-	stmt, errPrepare := u.db.Prepare("INSERT INTO user (public_id, user_id, club_id, status) VALUES (?, ?, ?, ?)")
+	fmt.Println(input)
+	stmt, errPrepare := u.db.Prepare("INSERT INTO club_member (public_id, user_id, club_id, status) VALUES (?, ?, ?, ?)")
 	if errPrepare != nil {
 		return errors.New("error prepare query statement")
 	}
@@ -34,6 +41,7 @@ func (u *memberRepository) Create(input model.ClubMember) error {
 
 	_, errExec := stmt.Exec(input.PublicId, input.UserId, input.ClubId, input.Status)
 	if errExec != nil {
+		logRepo.Error().Err(errExec).Msg("error query execution")
 		return errors.New("error query execution")
 	}
 

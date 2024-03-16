@@ -16,45 +16,50 @@ type ServiceInterface interface {
 	Delete(id string) error
 }
 
-type clubService struct {
-	clubRepository repo.RepositoryInterface
-	validate       *validator.Validate
+type memberService struct {
+	memberRepository repo.RepositoryInterface
+	validate         *validator.Validate
 }
 
 func New(repo repo.RepositoryInterface) ServiceInterface {
-	return &clubService{
-		clubRepository: repo,
-		validate:       validator.New(),
+	return &memberService{
+		memberRepository: repo,
+		validate:         validator.New(),
 	}
 }
 
 var logService = logger.NewLogger().Logger.With().Logger()
 
 // Create implements ServiceInterface.
-func (c *clubService) Create(input model.ClubMember) error {
+func (c *memberService) Create(input model.ClubMember) error {
 	input.PublicId = uuid.NewString()
 	if input.Status == "" {
-		input.Status = "Admin"
+		input.Status = "Owner"
+	}
+	err := c.memberRepository.Create(input)
+	if err != nil {
+		logService.Error().Err(err).Msg("failed to create new club member")
+		return err
 	}
 	return nil
 }
 
 // Delete implements ServiceInterface.
-func (c *clubService) Delete(id string) error {
+func (c *memberService) Delete(id string) error {
 	panic("unimplemented")
 }
 
 // Get implements ServiceInterface.
-func (c *clubService) Get() ([]model.ClubMember, error) {
+func (c *memberService) Get() ([]model.ClubMember, error) {
 	panic("unimplemented")
 }
 
 // GetById implements ServiceInterface.
-func (c *clubService) GetById(id string) (model.ClubMember, error) {
+func (c *memberService) GetById(id string) (model.ClubMember, error) {
 	panic("unimplemented")
 }
 
 // Update implements ServiceInterface.
-func (c *clubService) Update(input model.ClubMember, id string) (model.ClubMember, error) {
+func (c *memberService) Update(input model.ClubMember, id string) (model.ClubMember, error) {
 	panic("unimplemented")
 }
