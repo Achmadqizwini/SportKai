@@ -13,6 +13,10 @@ import (
 	memberDelivery "github.com/Achmadqizwini/SportKai/features/clubMember/delivery"
 	memberRepo "github.com/Achmadqizwini/SportKai/features/clubMember/repository"
 	memberService "github.com/Achmadqizwini/SportKai/features/clubMember/service"
+
+	authDelivery "github.com/Achmadqizwini/SportKai/features/auth/delivery"
+	authRepo "github.com/Achmadqizwini/SportKai/features/auth/repository"
+	authService "github.com/Achmadqizwini/SportKai/features/auth/service"
 	"net/http"
 )
 
@@ -28,5 +32,9 @@ func InitFactory(r *http.ServeMux, db *sql.DB) {
 	memberRepoFactory := memberRepo.New(db)
 	memberServiceFactory := memberService.New(memberRepoFactory)
 	memberDelivery.New(memberServiceFactory, r)
+
+	authRepoFactory := authRepo.New(db)
+	authServiceFactory := authService.New(authRepoFactory)
+	authDelivery.New(authServiceFactory, r)
 
 }

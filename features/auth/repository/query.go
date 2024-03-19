@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"errors"
+
 	"github.com/Achmadqizwini/SportKai/features/auth/model"
 )
 
@@ -23,9 +24,9 @@ func New(db *sql.DB) RepositoryInterface {
 // FindUser implements RepositoryInterface.
 func (a *authRepository) FindUser(input model.Auth) (model.Auth, error) {
 	userData := model.Auth{}
-	row := a.db.QueryRow("select public_id, fullname, email, password, phone, gender from user where email=? and password=?", input.Email, input.Password)
+	row := a.db.QueryRow("select id, public_id, fullname, email, password, phone, gender from user where email=?", input.Email)
 
-	err := row.Scan(&userData.PublicId, &userData.FullName, &userData.Email, &userData.Password, &userData.Phone, &userData.Gender)
+	err := row.Scan(&userData.ID, &userData.PublicId, &userData.FullName, &userData.Email, &userData.Password, &userData.Phone, &userData.Gender)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return model.Auth{}, errors.New("no user found")
