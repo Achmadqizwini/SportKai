@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/Achmadqizwini/SportKai/features/user"
+	"github.com/Achmadqizwini/SportKai/middlewares"
 	"github.com/Achmadqizwini/SportKai/utils/helper"
 )
 
@@ -19,7 +20,7 @@ func New(service user.ServiceInterface, r *http.ServeMux) {
 	}
 
 	r.HandleFunc("POST /users", handler.CreateUser)
-	r.HandleFunc("GET /users", handler.GetUsers)
+	r.HandleFunc("GET /users", middlewares.JWTMiddleware(handler.GetUsers))
 	r.HandleFunc("PUT /users/{id}", handler.UpdateUser)
 	r.HandleFunc("DELETE /users/{id}", handler.DeleteUser)
 	r.HandleFunc("GET /users/{id}", handler.GetUserById)
