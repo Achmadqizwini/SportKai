@@ -8,8 +8,9 @@ import (
 func GetConfig() *Config {
 	return &Config{
 		AppConfig: AppConfig{
-			AppHost: getEnv("APP_HOST", "localhost"),
-			AppPort: getEnvAsInt("APP_PORT", 8000),
+			AppHost:      getEnv("APP_HOST", "localhost"),
+			AppPort:      getEnvAsInt("APP_PORT", 8000),
+			AppSecretKey: getEnv("APP_SECRET_KEY", "S3CR3TK3Y"),
 		},
 		DBconfig: DBconfig{
 			DB_DRIVER:   getEnv("DB_DRIVER", "mysql"),
@@ -17,7 +18,7 @@ func GetConfig() *Config {
 			DB_PORT:     getEnvAsInt("DB_PORT", 3306),
 			DB_USERNAME: getEnv("DB_USER", "root"),
 			DB_PASSWORD: getEnv("DB_PASSWORD", ""),
-			DB_NAME:     getEnv("DB_NAME", "go-simple-template"),
+			DB_NAME:     getEnv("DB_NAME", "sport_kai"),
 		},
 		CacheConfig: CacheConfig{
 			CacheDriver: getEnv("CACHE_DRIVER", "redis"),
@@ -52,10 +53,11 @@ type Config struct {
 }
 
 type AppConfig struct {
-	AppName    string
-	AppVersion string
-	AppHost    string
-	AppPort    int
+	AppName      string
+	AppVersion   string
+	AppHost      string
+	AppPort      int
+	AppSecretKey string
 }
 
 type DBconfig struct {
