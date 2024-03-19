@@ -5,16 +5,17 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Achmadqizwini/SportKai/features/user"
+	"github.com/Achmadqizwini/SportKai/features/user/model"
+	svc "github.com/Achmadqizwini/SportKai/features/user/service"
 	"github.com/Achmadqizwini/SportKai/middlewares"
 	"github.com/Achmadqizwini/SportKai/utils/helper"
 )
 
 type UserDelivery struct {
-	userService user.ServiceInterface
+	userService svc.ServiceInterface
 }
 
-func New(service user.ServiceInterface, r *http.ServeMux) {
+func New(service svc.ServiceInterface, r *http.ServeMux) {
 	handler := &UserDelivery{
 		userService: service,
 	}
@@ -28,7 +29,7 @@ func New(service user.ServiceInterface, r *http.ServeMux) {
 }
 
 func (delivery *UserDelivery) CreateUser(w http.ResponseWriter, r *http.Request) {
-	var userInput user.User
+	var userInput model.User
 	var err error
 	contentType := r.Header.Get("Content-Type")
 	if strings.HasPrefix(contentType, "application/json") {
@@ -79,7 +80,7 @@ func (delivery *UserDelivery) GetUsers(w http.ResponseWriter, r *http.Request) {
 
 func (delivery *UserDelivery) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	var userInput user.User
+	var userInput model.User
 	var err error
 	contentType := r.Header.Get("Content-Type")
 	if strings.HasPrefix(contentType, "application/json") {
