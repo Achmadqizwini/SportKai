@@ -66,6 +66,12 @@ func (delivery *UserDelivery) CreateUser(w http.ResponseWriter, r *http.Request)
 }
 
 func (delivery *UserDelivery) GetUsers(w http.ResponseWriter, r *http.Request) {
+	// ctx := r.Context()
+
+	// user_id := ctx.Value(middlewares.Val("user_id")).(string)
+	// username := ctx.Value(middlewares.Val("username")).(string)
+	// email := ctx.Value(middlewares.Val("email")).(string)
+
 	users, err := delivery.userService.Get()
 	data := getUserResponseList(users)
 	if err != nil {
