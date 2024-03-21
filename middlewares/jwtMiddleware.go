@@ -1,12 +1,14 @@
 package middlewares
 
 import (
+	"context"
 	"encoding/json"
-	"github.com/Achmadqizwini/SportKai/config"
-	"github.com/Achmadqizwini/SportKai/utils/helper"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/Achmadqizwini/SportKai/config"
+	"github.com/Achmadqizwini/SportKai/utils/helper"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -16,6 +18,8 @@ var secretKey []byte
 func InitJWT(c *config.AppConfig) {
 	secretKey = []byte(c.AppSecretKey)
 }
+
+type Val string
 
 func CreateToken(id uint, publicID string, username string, email string) (string, error) {
 
@@ -43,7 +47,6 @@ func JWTMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		tokenString := strings.TrimSpace(r.Header.Get("Authorization"))
 		if tokenString == "" {
 			json.NewEncoder(w).Encode(helper.FailedResponse("You are not authorized for this operations. Login first"))
-
 			return
 		}
 		tokenString = tokenString[len("Bearer "):]
@@ -53,28 +56,38 @@ func JWTMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			// Validate the signing method and return the secret key
 			return secretKey, nil
 		})
-		if err != nil || !token.Valid {
+
+		if err != nil {
+			if err == jwt.ErrTokenExpired {
+				json.NewEncoder(w).Encode(helper.FailedResponse("Access Denied: Your current session has expired. Please log in again to continue."))
+				return
+			} else if err == jwt.ErrSignatureInvalid {
+				json.NewEncoder(w).Encode(helper.FailedResponse("Access Denied: Invalid token signature"))
+				return
+			} else {
+				json.NewEncoder(w).Encode(helper.FailedResponse("Error parsing token: " + err.Error()))
+				return
+			}
+		}
+
+		if !token.Valid {
+			json.NewEncoder(w).Encode(helper.FailedResponse("Access Denied: Token is invalid"))
+			return
+		}
+
+		// Extract claims from the token
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
 			json.NewEncoder(w).Encode(helper.FailedResponse("You are not authorized for this operations. Login first"))
 			return
 		}
-		// Extract claims from the token
-		// claims, ok := token.Claims.(jwt.MapClaims)
-		// if !ok {
-		// 	json.NewEncoder(w).Encode(helper.FailedResponse("You are not authorized for this operations"))
-		// 	return
-		// }
-
-		// Access specific data from the claims
-		// userI := claims["public_id"].(string)
-		// username := claims["username"].(string)
-		// email := claims["email"].(string)
 
 		// // Optionally, pass the extracted data to the request context
-		// r = r.WithContext(context.WithValue(r.Context(), "user_id", userID))
-		// r = r.WithContext(context.WithValue(r.Context(), "username", username))
-		// r = r.WithContext(context.WithValue(r.Context(), "email", email))
+		r = r.WithContext(context.WithValue(r.Context(), Val("user_id"), claims["public_id"].(string)))
+		r = r.WithContext(context.WithValue(r.Context(), Val("username"), claims["username"].(string)))
+		r = r.WithContext(context.WithValue(r.Context(), Val("email"), claims["email"].(string)))
 
 		// Call the next handler in the chain
-		next(w, r)
+		next.ServeHTTP(w, r)
 	}
 }
