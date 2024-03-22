@@ -2,7 +2,6 @@ package delivery
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -38,8 +37,10 @@ func (delivery *ClubDelivery) CreateMember(w http.ResponseWriter, r *http.Reques
 	} else if strings.HasPrefix(contentType, "application/x-www-form-urlencoded") || strings.HasPrefix(contentType, "multipart/form-data") {
 		err = r.ParseForm()
 		if err == nil {
-			clubInput.UserId, _ = strconv.Atoi(r.Form.Get("user_id"))
-			clubInput.ClubId, _ = strconv.Atoi(r.Form.Get("club_id"))
+			id, _ := strconv.Atoi(r.Form.Get("user_id"))
+			clubInput.UserId = uint(id)
+			id, _ = strconv.Atoi(r.Form.Get("club_id"))
+			clubInput.ClubId = uint(id)
 			clubInput.Status = r.Form.Get("status")
 		}
 	} else {
@@ -52,8 +53,6 @@ func (delivery *ClubDelivery) CreateMember(w http.ResponseWriter, r *http.Reques
 		json.NewEncoder(w).Encode(helper.FailedResponse("Error binding data " + err.Error()))
 		return
 	}
-
-	fmt.Println(clubInput)
 
 	err = delivery.clubService.Create(clubInput)
 	if err != nil {
