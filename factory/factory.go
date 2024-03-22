@@ -25,13 +25,13 @@ func InitFactory(r *http.ServeMux, db *sql.DB) {
 	userServiceFactory := userService.New(userRepoFactory)
 	userDelivery.New(userServiceFactory, r)
 
-	clubRepoFactory := clubRepo.New(db)
-	clubServiceFactory := clubService.New(clubRepoFactory)
-	clubDelivery.New(clubServiceFactory, r)
-
 	memberRepoFactory := memberRepo.New(db)
 	memberServiceFactory := memberService.New(memberRepoFactory)
 	memberDelivery.New(memberServiceFactory, r)
+
+	clubRepoFactory := clubRepo.New(db)
+	clubServiceFactory := clubService.New(clubRepoFactory, memberRepoFactory)
+	clubDelivery.New(clubServiceFactory, r)
 
 	authRepoFactory := authRepo.New(db)
 	authServiceFactory := authService.New(authRepoFactory)
