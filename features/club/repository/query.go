@@ -7,7 +7,7 @@ import (
 )
 
 type RepositoryInterface interface {
-	Create(input model.Club) error
+	Create(input model.Club) (uint, error)
 	Get() ([]model.Club, error)
 	GetById(id string) (model.Club, error)
 	Update(input model.Club, id string) (model.Club, error)
@@ -25,19 +25,26 @@ func New(db *sql.DB) RepositoryInterface {
 }
 
 // Create implements RepositoryInterface.
-func (c *clubRepository) Create(input model.Club) error {
-	stmt, errPrepare := c.db.Prepare("INSERT INTO club (public_id, name, address, city, description, joined_member, member_total, rules, requirements ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
-	if errPrepare != nil {
-		return errors.New("error prepare query statement")
+func (c *clubRepository) Create(input model.Club) (uint, error) {
+	stmt, err := c.db.Prepare("INSERT INTO club (public_id, name, address, city, description, joined_member, member_total, rules, requirements ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	if err != nil {
+		return 0, errors.New("error prepare query statement")
 	}
 	defer stmt.Close()
 
-	_, errExec := stmt.Exec(input.PublicId, input.Name, input.Address, input.City, input.Description, input.JoinedMember, input.MemberTotal, input.Rules, input.Requirements)
-	if errExec != nil {
-		return errors.New("error query execution")
+	rows, err := stmt.Exec(input.PublicId, input.Name, input.Address, input.City, input.Description, input.JoinedMember, input.MemberTotal, input.Rules, input.Requirements)
+	if err != nil {
+		return 0, errors.New("error query execution")
 	}
 
-	return nil
+	if row, _ := rows.RowsAffected(); row > 0 {
+		lastId, err := rows.LastInsertId()
+		if err == nil {
+			return uint(lastId), nil
+		}
+	}
+
+	return 0, err
 }
 
 // Delete implements RepositoryInterface.
