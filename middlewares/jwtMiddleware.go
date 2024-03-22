@@ -81,13 +81,20 @@ func JWTMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			json.NewEncoder(w).Encode(helper.FailedResponse("You are not authorized for this operations. Login first"))
 			return
 		}
+		idFloat64, ok := claims["id"].(float64)
+		if !ok {
+			json.NewEncoder(w).Encode(helper.FailedResponse("Error converting ID to uint"))
+			return
+		}
+		id := uint(idFloat64)
 
 		// // Optionally, pass the extracted data to the request context
+		r = r.WithContext(context.WithValue(r.Context(), Val("id"), id))
 		r = r.WithContext(context.WithValue(r.Context(), Val("user_id"), claims["public_id"].(string)))
 		r = r.WithContext(context.WithValue(r.Context(), Val("username"), claims["username"].(string)))
 		r = r.WithContext(context.WithValue(r.Context(), Val("email"), claims["email"].(string)))
 
 		// Call the next handler in the chain
-		next.ServeHTTP(w, r)
+		next(w, r)
 	}
 }
