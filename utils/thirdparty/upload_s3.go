@@ -2,7 +2,6 @@ package thirdparty
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"math/rand"
 	"os"
@@ -49,11 +48,6 @@ func UploadProfile(c echo.Context) (string, error) {
 	randomStr := String(20)
 
 	godotenv.Load(".env")
-
-	fmt.Println("aws region", os.Getenv("AWS_REGION"))
-	fmt.Println("access key", os.Getenv("ACCESS_KEY_IAM"))
-	fmt.Println("SECRET_KEY_IAM", os.Getenv("SECRET_KEY_IAM"))
-	fmt.Println("AWS_BUCKET_NAME", os.Getenv("AWS_BUCKET_NAME"))
 
 	s3Config := &aws.Config{
 		Region:      aws.String(os.Getenv("AWS_REGION")),
