@@ -1,6 +1,8 @@
 package service
 
 import (
+	"fmt"
+
 	"github.com/Achmadqizwini/SportKai/features/club/model"
 	repo "github.com/Achmadqizwini/SportKai/features/club/repository"
 	member "github.com/Achmadqizwini/SportKai/features/clubMember/model"
@@ -67,7 +69,13 @@ func (c *clubService) Delete(id string) error {
 
 // Get implements club.ServiceInterface.
 func (c *clubService) Get() ([]model.Club, error) {
-	panic("unimplemented")
+	club, err := c.clubRepository.Get()
+	fmt.Println(club)
+	if err != nil {
+		logService.Error().Err(err).Msg("failed to retrieve users")
+		return nil, err
+	}
+	return club, nil
 }
 
 // GetById implements club.ServiceInterface.

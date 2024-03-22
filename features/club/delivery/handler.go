@@ -22,11 +22,23 @@ func New(service svc.ServiceInterface, r *http.ServeMux) {
 	}
 
 	r.HandleFunc("POST /clubs", middlewares.JWTMiddleware(handler.CreateClub))
-	// r.HandleFunc("GET /clubs", handler.GetClub)
+	r.HandleFunc("GET /clubs", handler.GetClub)
 	// r.HandleFunc("PUT /clubs/{id}", handler.UpdateClub)
 	// r.HandleFunc("DELETE /clubs/{id}", handler.DeleteClub)
 	// r.HandleFunc("GET /clubs/{id}", handler.GetClubById)
 
+}
+
+func (c *ClubDelivery) GetClub(w http.ResponseWriter, r *http.Request) {
+	clubs, err := c.clubService.Get()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(helper.FailedResponse("failed to retrieve clubs"))
+		return
+	}
+	response := getClubResponseList(clubs)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(helper.SuccessWithDataResponse("success retrieve clubs", response))
 }
 
 func (delivery *ClubDelivery) CreateClub(w http.ResponseWriter, r *http.Request) {
