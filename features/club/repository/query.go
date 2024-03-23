@@ -72,24 +72,6 @@ func (c *clubRepository) Get() ([]model.Club, error) {
 	}
 
 	return clubs, nil
-	// clubs := []model.Club{}
-	// fmt.Println("test")
-	// row, err := c.db.Query("select public_id, name, address, city, description, joined_member, member_total, rules, requirements, created_at from club")
-	// if err != nil {
-	// 	return []model.Club{}, errors.New("failed to retrieve data, error query")
-	// }
-
-	// defer row.Close()
-
-	// for row.Next() {
-	// 	club := model.Club{}
-	// 	err = row.Scan(&club.PublicId, &club.Name, &club.Address, &club.City, &club.Description, &club.JoinedMember, &club.MemberTotal, &club.Rules, &club.Requirements, &club.CreatedAt)
-	// 	if err != nil {
-	// 		return []model.Club{}, errors.New("failed to retrieve data, error parsing to model")
-	// 	}
-	// 	clubs = append(clubs, club)
-	// }
-	// return clubs, nil
 }
 
 // GetById implements RepositoryInterface.
