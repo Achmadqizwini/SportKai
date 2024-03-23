@@ -6,12 +6,12 @@ import (
 )
 
 type MemberResponse struct {
-	PublicId string    `json:"id"`
-	User_id  uint      `json:"user_id"`
-	Club_id  uint      `json:"club_id"`
-	Status   string    `json:"status"`
-	JoinedAt time.Time `json:"joined_at"`
-	LeftAt   time.Time `json:"left_at"`
+	PublicId string     `json:"id"`
+	User_id  uint       `json:"user_id"`
+	Club_id  uint       `json:"club_id"`
+	Status   string     `json:"status"`
+	JoinedAt *time.Time `json:"joined_at"`
+	LeftAt   *time.Time `json:"left_at"`
 }
 
 func getMemberResponse(res model.ClubMember) MemberResponse {

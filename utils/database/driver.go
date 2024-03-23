@@ -20,7 +20,7 @@ func InitDB(cfg *config.Config) (*sql.DB, error) {
 
 	switch cfg.DBconfig.DB_DRIVER {
 	case driverMySQL:
-		connStr := fmt.Sprintf(`%s:%s@tcp(%s:%d)/%s`,
+		connStr := fmt.Sprintf(`%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True`,
 			cfg.DBconfig.DB_USERNAME,
 			cfg.DBconfig.DB_PASSWORD,
 			cfg.DBconfig.DB_HOST,

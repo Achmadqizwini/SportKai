@@ -43,7 +43,7 @@ func (repo *userRepository) Create(input model.User) (err error) {
 // Get implements RepositoryInterface.
 func (repo *userRepository) Get() ([]model.User, error) {
 	userData := []model.User{}
-	rows, err := repo.db.Query("select public_id, fullname, email, phone, gender from user")
+	rows, err := repo.db.Query("select public_id, fullname, email, phone, gender, created_at, updated_at from user")
 	if err != nil {
 		return nil, errors.New("error query")
 	}
@@ -51,7 +51,7 @@ func (repo *userRepository) Get() ([]model.User, error) {
 
 	for rows.Next() {
 		var u model.User
-		err := rows.Scan(&u.PublicId, &u.FullName, &u.Email, &u.Phone, &u.Gender)
+		err := rows.Scan(&u.PublicId, &u.FullName, &u.Email, &u.Phone, &u.Gender, &u.CreatedAt, &u.UpdatedAt)
 		if err != nil {
 			return nil, errors.New("error parsing data to model")
 		}

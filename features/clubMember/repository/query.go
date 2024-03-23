@@ -56,17 +56,15 @@ func (u *memberRepository) Delete(id string) error {
 // Get implements RepositoryInterface.
 func (u *memberRepository) Get() ([]model.ClubMember, error) {
 	members := []model.ClubMember{}
-	rows, err := u.db.Query("select id, public_id, user_id, club_id, status from club_member")
+	rows, err := u.db.Query("select id, public_id, user_id, club_id, status, joined_at, left_at from club_member")
 	if err != nil {
 		return nil, errors.New("error query")
 	}
-	fmt.Println(err)
-	fmt.Println(rows)
 	defer rows.Close()
 
 	for rows.Next() {
 		var u model.ClubMember
-		err := rows.Scan(&u.ID, &u.PublicId, &u.UserId, &u.ClubId, &u.Status)
+		err := rows.Scan(&u.ID, &u.PublicId, &u.UserId, &u.ClubId, &u.Status, &u.JoinedAt, &u.LeftAt)
 		if err != nil {
 			return nil, errors.New("error parsing data to model")
 		}
