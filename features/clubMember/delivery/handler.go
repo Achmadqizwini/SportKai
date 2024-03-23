@@ -11,24 +11,24 @@ import (
 	"github.com/Achmadqizwini/SportKai/utils/helper"
 )
 
-type ClubDelivery struct {
-	clubService svc.ServiceInterface
+type MemberDelivery struct {
+	memberService svc.ServiceInterface
 }
 
 func New(service svc.ServiceInterface, r *http.ServeMux) {
-	handler := &ClubDelivery{
-		clubService: service,
+	handler := &MemberDelivery{
+		memberService: service,
 	}
 
 	r.HandleFunc("POST /members", handler.CreateMember)
-	// r.HandleFunc("GET /members", handler.GetClub)
+	r.HandleFunc("GET /members", handler.GetMember)
 	// r.HandleFunc("PUT /members/{id}", handler.UpdateClub)
 	// r.HandleFunc("DELETE /members/{id}", handler.DeleteClub)
 	// r.HandleFunc("GET /members/{id}", handler.GetClubById)
 
 }
 
-func (delivery *ClubDelivery) CreateMember(w http.ResponseWriter, r *http.Request) {
+func (delivery *MemberDelivery) CreateMember(w http.ResponseWriter, r *http.Request) {
 	var clubInput model.ClubMember
 	var err error
 	contentType := r.Header.Get("Content-Type")
@@ -54,7 +54,7 @@ func (delivery *ClubDelivery) CreateMember(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	err = delivery.clubService.Create(clubInput)
+	err = delivery.memberService.Create(clubInput)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(helper.FailedResponse("Failed to insert data: " + err.Error()))
@@ -63,4 +63,16 @@ func (delivery *ClubDelivery) CreateMember(w http.ResponseWriter, r *http.Reques
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(helper.SuccessResponse("Success create new club member"))
+}
+
+func (delivery *MemberDelivery) GetMember(w http.ResponseWriter, r *http.Request) {
+	members, err := delivery.memberService.Get()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(helper.FailedResponse("failed to retrieve club members"))
+		return
+	}
+	response := getMemberResponseList(members)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(helper.SuccessWithDataResponse("success retrieve club members", response))
 }

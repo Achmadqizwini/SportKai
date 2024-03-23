@@ -51,7 +51,12 @@ func (c *memberService) Delete(id string) error {
 
 // Get implements ServiceInterface.
 func (c *memberService) Get() ([]model.ClubMember, error) {
-	panic("unimplemented")
+	member, err := c.memberRepository.Get()
+	if err != nil {
+		logService.Error().Err(err).Msg("failed to retrieve club member")
+		return nil, err
+	}
+	return member, nil
 }
 
 // GetById implements ServiceInterface.
