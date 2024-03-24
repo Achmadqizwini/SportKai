@@ -77,7 +77,12 @@ func (c *clubService) Get() ([]model.Club, error) {
 
 // GetById implements club.ServiceInterface.
 func (c *clubService) GetById(id string) (model.Club, error) {
-	panic("unimplemented")
+	res, err := c.clubRepository.GetById(id)
+	if err != nil {
+		logService.Error().Err(err).Msg("failed to get club by id")
+		return model.Club{}, err
+	}
+	return res, nil
 }
 
 // Update implements club.ServiceInterface.

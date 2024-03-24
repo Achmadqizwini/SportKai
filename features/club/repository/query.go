@@ -56,7 +56,7 @@ func (c *clubRepository) Delete(id string) error {
 // Get implements RepositoryInterface.
 func (c *clubRepository) Get() ([]model.Club, error) {
 	clubs := []model.Club{}
-	rows, err := c.db.Query("select public_id, name, address, city, description, joined_member, member_total, rules, requirements from club")
+	rows, err := c.db.Query("select public_id, name, address, city, description, joined_member, member_total, rules, requirements, created_at from club")
 	if err != nil {
 		return nil, errors.New("error query")
 	}
@@ -64,7 +64,7 @@ func (c *clubRepository) Get() ([]model.Club, error) {
 
 	for rows.Next() {
 		var u model.Club
-		err := rows.Scan(&u.PublicId, &u.Name, &u.Address, &u.City, &u.Description, &u.JoinedMember, &u.MemberTotal, &u.Rules, &u.Requirements)
+		err := rows.Scan(&u.PublicId, &u.Name, &u.Address, &u.City, &u.Description, &u.JoinedMember, &u.MemberTotal, &u.Rules, &u.Requirements, &u.CreatedAt)
 		if err != nil {
 			return nil, errors.New("error parsing data to model")
 		}
@@ -76,7 +76,18 @@ func (c *clubRepository) Get() ([]model.Club, error) {
 
 // GetById implements RepositoryInterface.
 func (c *clubRepository) GetById(id string) (model.Club, error) {
-	panic("unimplemented")
+	clubData := model.Club{}
+	row := c.db.QueryRow("select public_id, name, address, city, description, joined_member, member_total, rules, requirements, created_at from club where public_id=?", id)
+
+	err := row.Scan(&clubData.PublicId, &clubData.Name, &clubData.Address, &clubData.City, &clubData.Description, &clubData.JoinedMember, &clubData.MemberTotal, &clubData.Rules, &clubData.Requirements, &clubData.CreatedAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return model.Club{}, errors.New("no club found")
+		}
+		return model.Club{}, errors.New("error parsing to model")
+	}
+
+	return clubData, nil
 }
 
 // Update implements RepositoryInterface.

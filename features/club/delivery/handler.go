@@ -25,7 +25,7 @@ func New(service svc.ServiceInterface, r *http.ServeMux) {
 	r.HandleFunc("GET /clubs", handler.GetClub)
 	// r.HandleFunc("PUT /clubs/{id}", handler.UpdateClub)
 	// r.HandleFunc("DELETE /clubs/{id}", handler.DeleteClub)
-	// r.HandleFunc("GET /clubs/{id}", handler.GetClubById)
+	r.HandleFunc("GET /clubs/{id}", handler.GetClubById)
 
 }
 
@@ -79,4 +79,19 @@ func (delivery *ClubDelivery) CreateClub(w http.ResponseWriter, r *http.Request)
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(helper.SuccessResponse("Success create new clubs"))
+}
+
+func (delivery *ClubDelivery) GetClubById(w http.ResponseWriter, r *http.Request) {
+
+	id := r.PathValue("id")
+	res, err := delivery.clubService.GetById(id)
+	clubData := getClubResponse(res)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(helper.FailedResponse("Failed to retrieve club: " + err.Error()))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(helper.SuccessWithDataResponse("Success retrieve club", clubData))
 }
