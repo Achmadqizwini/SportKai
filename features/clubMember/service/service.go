@@ -34,7 +34,7 @@ var logService = logger.NewLogger().Logger.With().Logger()
 func (c *memberService) Create(input model.ClubMember) error {
 	input.PublicId = uuid.NewString()
 	if input.Status == "" {
-		input.Status = "Owner"
+		input.Status = "Requested"
 	}
 	err := c.memberRepository.Create(input)
 	if err != nil {
@@ -61,10 +61,25 @@ func (c *memberService) Get() ([]model.ClubMember, error) {
 
 // GetById implements ServiceInterface.
 func (c *memberService) GetById(id string) (model.ClubMember, error) {
-	panic("unimplemented")
+	res, err := c.memberRepository.GetById(id)
+	if err != nil {
+		logService.Error().Err(err).Msg("failed to get member by id")
+		return model.ClubMember{}, err
+	}
+	return res, nil
 }
 
 // Update implements ServiceInterface.
 func (c *memberService) Update(input model.ClubMember, id string) (model.ClubMember, error) {
-	panic("unimplemented")
+	err := c.memberRepository.Update(input, id)
+	if err != nil {
+		logService.Error().Err(err).Msg("failed to update club member")
+		return model.ClubMember{}, err
+	}
+	updatedMember, err := c.memberRepository.GetById(id)
+	if err != nil {
+		logService.Error().Err(err).Msg("failed to retrieve updated member")
+		return model.ClubMember{}, err
+	}
+	return updatedMember, nil
 }

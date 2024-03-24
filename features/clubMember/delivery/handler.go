@@ -22,26 +22,26 @@ func New(service svc.ServiceInterface, r *http.ServeMux) {
 
 	r.HandleFunc("POST /members", handler.CreateMember)
 	r.HandleFunc("GET /members", handler.GetMember)
-	// r.HandleFunc("PUT /members/{id}", handler.UpdateClub)
+	r.HandleFunc("PUT /members/{id}", handler.UpdateMember)
 	// r.HandleFunc("DELETE /members/{id}", handler.DeleteClub)
-	// r.HandleFunc("GET /members/{id}", handler.GetClubById)
+	r.HandleFunc("GET /members/{id}", handler.GetMemberById)
 
 }
 
 func (delivery *MemberDelivery) CreateMember(w http.ResponseWriter, r *http.Request) {
-	var clubInput model.ClubMember
+	var memberInput model.ClubMember
 	var err error
 	contentType := r.Header.Get("Content-Type")
 	if strings.HasPrefix(contentType, "application/json") {
-		err = json.NewDecoder(r.Body).Decode(&clubInput)
+		err = json.NewDecoder(r.Body).Decode(&memberInput)
 	} else if strings.HasPrefix(contentType, "application/x-www-form-urlencoded") || strings.HasPrefix(contentType, "multipart/form-data") {
 		err = r.ParseForm()
 		if err == nil {
 			id, _ := strconv.Atoi(r.Form.Get("user_id"))
-			clubInput.UserId = uint(id)
+			memberInput.UserId = uint(id)
 			id, _ = strconv.Atoi(r.Form.Get("club_id"))
-			clubInput.ClubId = uint(id)
-			clubInput.Status = r.Form.Get("status")
+			memberInput.ClubId = uint(id)
+			memberInput.Status = r.Form.Get("status")
 		}
 	} else {
 		w.WriteHeader(http.StatusUnsupportedMediaType)
@@ -54,7 +54,7 @@ func (delivery *MemberDelivery) CreateMember(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	err = delivery.memberService.Create(clubInput)
+	err = delivery.memberService.Create(memberInput)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(helper.FailedResponse("Failed to insert data: " + err.Error()))
@@ -75,4 +75,53 @@ func (delivery *MemberDelivery) GetMember(w http.ResponseWriter, r *http.Request
 	response := getMemberResponseList(members)
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(helper.SuccessWithDataResponse("success retrieve club members", response))
+}
+
+func (delivery *MemberDelivery) UpdateMember(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	var memberInput model.ClubMember
+	var err error
+	contentType := r.Header.Get("Content-Type")
+	if strings.HasPrefix(contentType, "application/json") {
+		err = json.NewDecoder(r.Body).Decode(&memberInput)
+	} else if strings.HasPrefix(contentType, "application/x-www-form-urlencoded") || strings.HasPrefix(contentType, "multipart/form-data") {
+		err = r.ParseForm()
+		if err == nil {
+			memberInput.Status = r.Form.Get("status")
+
+		}
+	} else {
+		w.WriteHeader(http.StatusUnsupportedMediaType)
+		json.NewEncoder(w).Encode(helper.FailedResponse("Unsupported content type"))
+		return
+	}
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(helper.FailedResponse("Error binding data. " + err.Error()))
+		return
+	}
+	result, err := delivery.memberService.Update(memberInput, id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(helper.FailedResponse("Failed to update data: " + err.Error()))
+		return
+	}
+	updatedUser := getMemberResponse(result)
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(helper.SuccessWithDataResponse("Success update users", updatedUser))
+}
+
+func (delivery *MemberDelivery) GetMemberById(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	res, err := delivery.memberService.GetById(id)
+	memberData := getMemberResponse(res)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(helper.FailedResponse("Failed to retrieve member: " + err.Error()))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(helper.SuccessWithDataResponse("Success retrieve member", memberData))
 }

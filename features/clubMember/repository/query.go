@@ -14,7 +14,7 @@ type RepositoryInterface interface {
 	Create(input model.ClubMember) error
 	Get() ([]model.ClubMember, error)
 	GetById(id string) (model.ClubMember, error)
-	Update(input model.ClubMember, id string) (model.ClubMember, error)
+	Update(input model.ClubMember, id string) error
 	Delete(id string) error
 }
 
@@ -76,10 +76,35 @@ func (u *memberRepository) Get() ([]model.ClubMember, error) {
 
 // GetById implements RepositoryInterface.
 func (u *memberRepository) GetById(id string) (model.ClubMember, error) {
-	panic("unimplemented")
+	memberData := model.ClubMember{}
+	row := u.db.QueryRow("SELECT m.public_id, u.public_id as user_id, c.public_id AS club_id, m.status "+
+		"FROM club_member m "+
+		"JOIN user u ON m.user_id = u.id "+
+		"JOIN club c ON m.club_id = c.id "+
+		"WHERE m.public_id=?", id)
+	err := row.Scan(&memberData.PublicId, &memberData.UserId, &memberData.ClubId, &memberData.Status)
+	if err != nil {
+		fmt.Println(err)
+		return model.ClubMember{}, errors.New("error parsing data to model")
+	}
+	return memberData, nil
 }
 
 // Update implements RepositoryInterface.
-func (u *memberRepository) Update(input model.ClubMember, id string) (model.ClubMember, error) {
-	panic("unimplemented")
+func (u *memberRepository) Update(input model.ClubMember, id string) error {
+	stmt, err := u.db.Prepare("UPDATE club_member SET status=? WHERE public_id=?")
+	if err != nil {
+		return errors.New("error query prepare statement")
+	}
+	defer stmt.Close()
+
+	result, errExec := stmt.Exec(input.Status, id)
+	if errExec != nil {
+		return errors.New("error query execution")
+	}
+	if row, err := result.RowsAffected(); row == 0 || err != nil {
+		return errors.New("update failed, no rows affected")
+	}
+
+	return nil
 }
