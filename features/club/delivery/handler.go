@@ -69,7 +69,7 @@ func (delivery *ClubDelivery) CreateClub(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	ctx := r.Context()
-	user_id := ctx.Value(middlewares.Val("id")).(uint)
+	user_id := ctx.Value(middlewares.Val("user_id")).(string)
 	err = delivery.clubService.Create(clubInput, user_id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
