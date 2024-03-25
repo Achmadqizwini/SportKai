@@ -11,7 +11,7 @@ import (
 )
 
 type ServiceInterface interface {
-	Create(input model.Club, user_id uint) error
+	Create(input model.Club, user_id string) error
 	Get() ([]model.Club, error)
 	GetById(id string) (model.Club, error)
 	Update(input model.Club, id string) (model.Club, error)
@@ -35,7 +35,7 @@ func New(repo repo.RepositoryInterface, mem memberRepo.RepositoryInterface) Serv
 var logService = logger.NewLogger().Logger.With().Logger()
 
 // Create implements club.ServiceInterface.
-func (c *clubService) Create(input model.Club, user_id uint) error {
+func (c *clubService) Create(input model.Club, user_id string) error {
 	if errValidate := c.validate.Struct(input); errValidate != nil {
 		logService.Error().Err(errValidate).Msg("error validate input, please check your input")
 		return errValidate
@@ -46,7 +46,7 @@ func (c *clubService) Create(input model.Club, user_id uint) error {
 		logService.Error().Err(err).Msg("failed to create new club")
 		return err
 	}
-	memberInput := member.ClubMember{
+	memberInput := member.MemberPayload{
 		PublicId: uuid.NewString(),
 		ClubId:   lastId,
 		UserId:   user_id,
@@ -56,7 +56,6 @@ func (c *clubService) Create(input model.Club, user_id uint) error {
 		logService.Error().Err(err).Msg("failed to create new member club")
 		return err
 	}
-	// create a member struct
 	return nil
 }
 
