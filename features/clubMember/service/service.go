@@ -9,7 +9,7 @@ import (
 )
 
 type ServiceInterface interface {
-	Create(input model.ClubMember) error
+	Create(input model.MemberPayload) error
 	Get() ([]model.ClubMember, error)
 	GetById(id string) (model.ClubMember, error)
 	Update(input model.ClubMember, id string) (model.ClubMember, error)
@@ -31,7 +31,7 @@ func New(repo repo.RepositoryInterface) ServiceInterface {
 var logService = logger.NewLogger().Logger.With().Logger()
 
 // Create implements ServiceInterface.
-func (c *memberService) Create(input model.ClubMember) error {
+func (c *memberService) Create(input model.MemberPayload) error {
 	input.PublicId = uuid.NewString()
 	if input.Status == "" {
 		input.Status = "Requested"

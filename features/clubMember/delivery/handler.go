@@ -3,7 +3,6 @@ package delivery
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/Achmadqizwini/SportKai/features/clubMember/model"
@@ -29,7 +28,7 @@ func New(service svc.ServiceInterface, r *http.ServeMux) {
 }
 
 func (delivery *MemberDelivery) CreateMember(w http.ResponseWriter, r *http.Request) {
-	var memberInput model.ClubMember
+	var memberInput model.MemberPayload
 	var err error
 	contentType := r.Header.Get("Content-Type")
 	if strings.HasPrefix(contentType, "application/json") {
@@ -37,10 +36,8 @@ func (delivery *MemberDelivery) CreateMember(w http.ResponseWriter, r *http.Requ
 	} else if strings.HasPrefix(contentType, "application/x-www-form-urlencoded") || strings.HasPrefix(contentType, "multipart/form-data") {
 		err = r.ParseForm()
 		if err == nil {
-			id, _ := strconv.Atoi(r.Form.Get("user_id"))
-			memberInput.UserId = uint(id)
-			id, _ = strconv.Atoi(r.Form.Get("club_id"))
-			memberInput.ClubId = uint(id)
+			memberInput.UserId = r.Form.Get("user_id")
+			memberInput.ClubId = r.Form.Get("club_id")
 			memberInput.Status = r.Form.Get("status")
 		}
 	} else {
