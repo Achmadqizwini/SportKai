@@ -10,9 +10,9 @@ import (
 
 type ServiceInterface interface {
 	Create(input model.MemberPayload) error
-	Get() ([]model.ClubMember, error)
-	GetById(id string) (model.ClubMember, error)
-	Update(input model.ClubMember, id string) (model.ClubMember, error)
+	Get() ([]model.MemberPayload, error)
+	GetById(id string) (model.MemberPayload, error)
+	Update(input model.ClubMember, id string) (model.MemberPayload, error)
 	Delete(id string) error
 }
 
@@ -46,11 +46,16 @@ func (c *memberService) Create(input model.MemberPayload) error {
 
 // Delete implements ServiceInterface.
 func (c *memberService) Delete(id string) error {
-	panic("unimplemented")
+	err := c.memberRepository.Delete(id)
+	if err != nil {
+		logService.Error().Err(err).Msg("failed to kick member")
+		return err
+	}
+	return nil
 }
 
 // Get implements ServiceInterface.
-func (c *memberService) Get() ([]model.ClubMember, error) {
+func (c *memberService) Get() ([]model.MemberPayload, error) {
 	member, err := c.memberRepository.Get()
 	if err != nil {
 		logService.Error().Err(err).Msg("failed to retrieve club member")
@@ -60,26 +65,26 @@ func (c *memberService) Get() ([]model.ClubMember, error) {
 }
 
 // GetById implements ServiceInterface.
-func (c *memberService) GetById(id string) (model.ClubMember, error) {
+func (c *memberService) GetById(id string) (model.MemberPayload, error) {
 	res, err := c.memberRepository.GetById(id)
 	if err != nil {
 		logService.Error().Err(err).Msg("failed to get member by id")
-		return model.ClubMember{}, err
+		return model.MemberPayload{}, err
 	}
 	return res, nil
 }
 
 // Update implements ServiceInterface.
-func (c *memberService) Update(input model.ClubMember, id string) (model.ClubMember, error) {
+func (c *memberService) Update(input model.ClubMember, id string) (model.MemberPayload, error) {
 	err := c.memberRepository.Update(input, id)
 	if err != nil {
 		logService.Error().Err(err).Msg("failed to update club member")
-		return model.ClubMember{}, err
+		return model.MemberPayload{}, err
 	}
 	updatedMember, err := c.memberRepository.GetById(id)
 	if err != nil {
 		logService.Error().Err(err).Msg("failed to retrieve updated member")
-		return model.ClubMember{}, err
+		return model.MemberPayload{}, err
 	}
 	return updatedMember, nil
 }

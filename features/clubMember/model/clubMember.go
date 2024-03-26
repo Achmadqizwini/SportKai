@@ -15,8 +15,11 @@ type ClubMember struct {
 }
 
 type MemberPayload struct {
-	PublicId string
-	UserId   string `json:"user_id" form:"user_id"`
-	ClubId   string `json:"club_id" form:"club_id"`
-	Status   string `json:"status" form:"status"`
+	ID       uint
+	PublicId string     `json:"id"`
+	UserId   string     `json:"user_id" form:"user_id"`
+	ClubId   string     `json:"club_id" form:"club_id"`
+	Status   string     `json:"status" form:"status"`
+	JoinedAt *time.Time `json:"joined_at"`
+	LeftAt   *time.Time `json:"left_at"`
 }

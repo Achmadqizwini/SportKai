@@ -10,8 +10,8 @@ import (
 
 type RepositoryInterface interface {
 	Create(input model.MemberPayload) error
-	Get() ([]model.ClubMember, error)
-	GetById(id string) (model.ClubMember, error)
+	Get() ([]model.MemberPayload, error)
+	GetById(id string) (model.MemberPayload, error)
 	Update(input model.ClubMember, id string) error
 	Delete(id string) error
 }
@@ -60,12 +60,26 @@ func (u *memberRepository) Create(input model.MemberPayload) error {
 
 // Delete implements RepositoryInterface.
 func (u *memberRepository) Delete(id string) error {
-	panic("unimplemented")
+	stmt, errPrepare := u.db.Prepare("DELETE FROM club_member WHERE public_id = ?")
+	if errPrepare != nil {
+		return errors.New("error prepare query statement")
+	}
+	defer stmt.Close()
+
+	res, errExec := stmt.Exec(id)
+	if row, err := res.RowsAffected(); row == 0 || err != nil {
+		return errors.New("no member found")
+	}
+	if errExec != nil {
+		return errors.New("error query deletion")
+	}
+
+	return nil
 }
 
 // Get implements RepositoryInterface.
-func (u *memberRepository) Get() ([]model.ClubMember, error) {
-	members := []model.ClubMember{}
+func (u *memberRepository) Get() ([]model.MemberPayload, error) {
+	members := []model.MemberPayload{}
 	rows, err := u.db.Query("select id, public_id, user_id, club_id, status, joined_at, left_at from club_member")
 	if err != nil {
 		return nil, errors.New("error query")
@@ -73,7 +87,7 @@ func (u *memberRepository) Get() ([]model.ClubMember, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var u model.ClubMember
+		var u model.MemberPayload
 		err := rows.Scan(&u.ID, &u.PublicId, &u.UserId, &u.ClubId, &u.Status, &u.JoinedAt, &u.LeftAt)
 		if err != nil {
 			return nil, errors.New("error parsing data to model")
@@ -85,16 +99,16 @@ func (u *memberRepository) Get() ([]model.ClubMember, error) {
 }
 
 // GetById implements RepositoryInterface.
-func (u *memberRepository) GetById(id string) (model.ClubMember, error) {
-	memberData := model.ClubMember{}
-	row := u.db.QueryRow("SELECT m.public_id, u.public_id as user_id, c.public_id AS club_id, m.status "+
+func (u *memberRepository) GetById(id string) (model.MemberPayload, error) {
+	memberData := model.MemberPayload{}
+	row := u.db.QueryRow("SELECT m.public_id, u.public_id as user_id, c.public_id AS club_id, m.status, m.joined_at "+
 		"FROM club_member m "+
 		"JOIN user u ON m.user_id = u.id "+
 		"JOIN club c ON m.club_id = c.id "+
 		"WHERE m.public_id=?", id)
-	err := row.Scan(&memberData.PublicId, &memberData.UserId, &memberData.ClubId, &memberData.Status)
+	err := row.Scan(&memberData.PublicId, &memberData.UserId, &memberData.ClubId, &memberData.Status, &memberData.JoinedAt)
 	if err != nil {
-		return model.ClubMember{}, errors.New("error parsing data to model")
+		return model.MemberPayload{}, errors.New("error parsing data to model")
 	}
 	return memberData, nil
 }
