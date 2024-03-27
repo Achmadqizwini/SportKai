@@ -24,7 +24,7 @@ func New(service svc.ServiceInterface, r *http.ServeMux) {
 	r.HandleFunc("POST /clubs", middlewares.JWTMiddleware(handler.CreateClub))
 	r.HandleFunc("GET /clubs", handler.GetClub)
 	// r.HandleFunc("PUT /clubs/{id}", handler.UpdateClub)
-	// r.HandleFunc("DELETE /clubs/{id}", handler.DeleteClub)
+	r.HandleFunc("DELETE /clubs/{id}", handler.DeleteClub)
 	r.HandleFunc("GET /clubs/{id}", handler.GetClubById)
 
 }
@@ -94,4 +94,17 @@ func (delivery *ClubDelivery) GetClubById(w http.ResponseWriter, r *http.Request
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(helper.SuccessWithDataResponse("Success retrieve club", clubData))
+}
+
+func (delivery *ClubDelivery) DeleteClub(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	err := delivery.clubService.Delete(id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(helper.FailedResponse("Failed to delete club: " + err.Error()))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(helper.SuccessResponse("Success remove delete club"))
 }

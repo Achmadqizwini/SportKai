@@ -61,7 +61,12 @@ func (c *clubService) Create(input model.Club, user_id string) error {
 
 // Delete implements club.ServiceInterface.
 func (c *clubService) Delete(id string) error {
-	panic("unimplemented")
+	err := c.clubRepository.Delete(id)
+	if err != nil {
+		logService.Error().Err(err).Msg("failed to delete club")
+		return err
+	}
+	return nil
 }
 
 // Get implements club.ServiceInterface.

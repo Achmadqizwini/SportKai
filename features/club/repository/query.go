@@ -55,7 +55,21 @@ func (c *clubRepository) Create(input model.Club) (string, error) {
 
 // Delete implements RepositoryInterface.
 func (c *clubRepository) Delete(id string) error {
-	panic("unimplemented")
+	stmt, errPrepare := c.db.Prepare("DELETE FROM club WHERE public_id = ?")
+	if errPrepare != nil {
+		return errors.New("error prepare query statement")
+	}
+	defer stmt.Close()
+	// wip delete child data also
+	res, errExec := stmt.Exec(id)
+	if errExec != nil {
+		return errors.New("error query deletion")
+	}
+	if row, err := res.RowsAffected(); row == 0 || err != nil {
+		return errors.New("no club found")
+	}
+
+	return nil
 }
 
 // Get implements RepositoryInterface.
