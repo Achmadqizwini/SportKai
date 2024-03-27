@@ -48,7 +48,7 @@ func (c *memberService) Create(input model.MemberPayload) error {
 func (c *memberService) Delete(id string) error {
 	err := c.memberRepository.Delete(id)
 	if err != nil {
-		logService.Error().Err(err).Msg("failed to kick member")
+		logService.Error().Err(err).Msg("failed to left club")
 		return err
 	}
 	return nil

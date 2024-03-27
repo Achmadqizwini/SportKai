@@ -67,11 +67,11 @@ func (u *memberRepository) Delete(id string) error {
 	defer stmt.Close()
 
 	res, errExec := stmt.Exec(id)
-	if row, err := res.RowsAffected(); row == 0 || err != nil {
-		return errors.New("no member found")
-	}
 	if errExec != nil {
 		return errors.New("error query deletion")
+	}
+	if row, err := res.RowsAffected(); row == 0 || err != nil {
+		return errors.New("no member found")
 	}
 
 	return nil
