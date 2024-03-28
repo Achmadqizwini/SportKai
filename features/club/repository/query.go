@@ -11,7 +11,7 @@ type RepositoryInterface interface {
 	Create(input model.Club) (string, error)
 	Get() ([]model.Club, error)
 	GetById(id string) (model.Club, error)
-	Update(input model.Club, id string) (model.Club, error)
+	Update(input model.Club, id string) error
 	Delete(id string) error
 }
 
@@ -110,6 +110,20 @@ func (c *clubRepository) GetById(id string) (model.Club, error) {
 }
 
 // Update implements RepositoryInterface.
-func (c *clubRepository) Update(input model.Club, id string) (model.Club, error) {
-	panic("unimplemented")
+func (c *clubRepository) Update(input model.Club, id string) error {
+	stmt, err := c.db.Prepare("UPDATE club SET name=?, address=?, city=?, description=?, rules=?, requirements=?  WHERE public_id=?")
+	if err != nil {
+		return errors.New("error query prepare statement")
+	}
+	defer stmt.Close()
+
+	result, errExec := stmt.Exec(input.Name, input.Address, input.City, input.Description, input.Rules, input.Requirements, id)
+	if errExec != nil {
+		return errors.New("error query execution")
+	}
+	if row, err := result.RowsAffected(); row == 0 || err != nil {
+		return errors.New("update failed, no rows affected")
+	}
+
+	return nil
 }

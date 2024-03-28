@@ -23,7 +23,7 @@ func New(service svc.ServiceInterface, r *http.ServeMux) {
 
 	r.HandleFunc("POST /clubs", middlewares.JWTMiddleware(handler.CreateClub))
 	r.HandleFunc("GET /clubs", handler.GetClub)
-	// r.HandleFunc("PUT /clubs/{id}", handler.UpdateClub)
+	r.HandleFunc("PUT /clubs/{id}", handler.UpdateClub)
 	r.HandleFunc("DELETE /clubs/{id}", handler.DeleteClub)
 	r.HandleFunc("GET /clubs/{id}", handler.GetClubById)
 
@@ -107,4 +107,44 @@ func (delivery *ClubDelivery) DeleteClub(w http.ResponseWriter, r *http.Request)
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(helper.SuccessResponse("Success remove delete club"))
+}
+
+func (delivery *ClubDelivery) UpdateClub(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	var clubInput model.Club
+	var err error
+	contentType := r.Header.Get("Content-Type")
+	if strings.HasPrefix(contentType, "application/json") {
+		err = json.NewDecoder(r.Body).Decode(&clubInput)
+	} else if strings.HasPrefix(contentType, "application/x-www-form-urlencoded") || strings.HasPrefix(contentType, "multipart/form-data") {
+		err = r.ParseForm()
+		if err == nil {
+			clubInput.Name = r.Form.Get("name")
+			clubInput.Address = r.Form.Get("address")
+			clubInput.City = r.Form.Get("city")
+			clubInput.Description = r.Form.Get("description")
+			clubInput.Rules = r.Form.Get("rules")
+			clubInput.Requirements = r.Form.Get("requirements")
+
+		}
+	} else {
+		w.WriteHeader(http.StatusUnsupportedMediaType)
+		json.NewEncoder(w).Encode(helper.FailedResponse("Unsupported content type"))
+		return
+	}
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(helper.FailedResponse("Error binding data. " + err.Error()))
+		return
+	}
+	result, err := delivery.clubService.Update(clubInput, id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(helper.FailedResponse("Failed to update data: " + err.Error()))
+		return
+	}
+	updatedUser := getClubResponse(result)
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(helper.SuccessWithDataResponse("Success update club", updatedUser))
 }

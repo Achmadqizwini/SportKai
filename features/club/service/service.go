@@ -53,7 +53,7 @@ func (c *clubService) Create(input model.Club, user_id string) error {
 		Status:   "Owner",
 	}
 	if err := c.memberRepository.Create(memberInput); err != nil {
-		logService.Error().Err(err).Msg("failed to create new member club")
+		logService.Error().Err(err).Msg("failed to create new club")
 		return err
 	}
 	return nil
@@ -73,7 +73,7 @@ func (c *clubService) Delete(id string) error {
 func (c *clubService) Get() ([]model.Club, error) {
 	club, err := c.clubRepository.Get()
 	if err != nil {
-		logService.Error().Err(err).Msg("failed to retrieve member")
+		logService.Error().Err(err).Msg("failed to retrieve club")
 		return nil, err
 	}
 	return club, nil
@@ -91,5 +91,15 @@ func (c *clubService) GetById(id string) (model.Club, error) {
 
 // Update implements club.ServiceInterface.
 func (c *clubService) Update(input model.Club, id string) (model.Club, error) {
-	panic("unimplemented")
+	err := c.clubRepository.Update(input, id)
+	if err != nil {
+		logService.Error().Err(err).Msg("failed to update club club")
+		return model.Club{}, err
+	}
+	updatedClub, err := c.clubRepository.GetById(id)
+	if err != nil {
+		logService.Error().Err(err).Msg("failed to retrieve updated club")
+		return model.Club{}, err
+	}
+	return updatedClub, nil
 }
