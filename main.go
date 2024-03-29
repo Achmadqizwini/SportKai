@@ -8,7 +8,6 @@ import (
 	"github.com/Achmadqizwini/SportKai/utils/database"
 	"github.com/Achmadqizwini/SportKai/utils/logger"
 	"github.com/joho/godotenv"
-	// "github.com/rs/cors"
 	"net/http"
 )
 
