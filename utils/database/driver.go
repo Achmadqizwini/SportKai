@@ -39,21 +39,18 @@ func InitDB(cfg *config.Config) (*sql.DB, error) {
 		)
 		db, err = sql.Open("postgres", connStr)
 	default:
-		return nil, fmt.Errorf("unsupported database driver: %s", cfg.DBconfig.DB_DRIVER)
+		return nil, err
 
 	}
 
 	if err != nil {
-		return nil, fmt.Errorf("error opening connection: %v", err)
+		return nil, err
 	}
 
 	errPing := db.Ping()
 	if errPing != nil {
 		db.Close()
-		return nil, fmt.Errorf("error connecting to database: %v", errPing)
+		return nil, errPing
 	}
-
-	fmt.Println("Database Connection Success")
 	return db, nil
-
 }
