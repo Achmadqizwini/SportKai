@@ -30,13 +30,14 @@ func InitDB(cfg *config.Config) (*sql.DB, error) {
 		db, err = sql.Open(driverMySQL, connStr)
 
 	case driverPostgreSQL:
-		connStr := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable",
+		connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 			cfg.DBconfig.DB_HOST,
+			cfg.DBconfig.DB_PORT,
 			cfg.DBconfig.DB_USERNAME,
 			cfg.DBconfig.DB_PASSWORD,
 			cfg.DBconfig.DB_NAME,
-			cfg.DBconfig.DB_PORT,
 		)
+
 		db, err = sql.Open("postgres", connStr)
 	default:
 		return nil, err
