@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/Achmadqizwini/SportKai/features/user/model"
+	"github.com/Achmadqizwini/SportKai/utils/logger"
 )
 
 type RepositoryInterface interface {
@@ -24,17 +25,25 @@ func New(db *sql.DB) RepositoryInterface {
 	}
 }
 
+var logService = logger.NewLogger().Logger.With().Logger()
+
 // Create implements Repository
 func (repo *userRepository) Create(input model.User) (err error) {
-	stmt, errPrepare := repo.db.Prepare("INSERT INTO user (public_id, fullname, email, password, phone, gender) VALUES (?, ?, ?, ?, ?, ?)")
+	stmt, errPrepare := repo.db.Prepare(`
+	INSERT INTO "user" (public_id, fullname, email, password, phone, gender) 
+	VALUES ($1, $2, $3, $4, $5, $6)
+	`)
+
 	if errPrepare != nil {
-		return errors.New("error prepare query statement")
+		logService.Error().Err(errPrepare).Msg("error prepare query statement")
+		return errPrepare
 	}
 	defer stmt.Close()
 
 	_, errExec := stmt.Exec(input.PublicId, input.FullName, input.Email, input.Password, input.Phone, input.Gender)
 	if errExec != nil {
-		return errors.New("error query execution")
+		logService.Error().Err(errExec).Msg("error query execution")
+		return errExec
 	}
 
 	return nil

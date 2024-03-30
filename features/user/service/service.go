@@ -1,6 +1,8 @@
 package service
 
 import (
+	"errors"
+
 	"github.com/Achmadqizwini/SportKai/features/user/model"
 	repo "github.com/Achmadqizwini/SportKai/features/user/repository"
 	"github.com/Achmadqizwini/SportKai/utils/logger"
@@ -48,8 +50,8 @@ func (svc *userService) Create(input model.User) (err error) {
 	input.Password = string(bytePass)
 
 	if errCreate := svc.userRepository.Create(input); errCreate != nil {
-		logService.Error().Err(err).Msg("failed to create new user")
-		return errCreate
+		logService.Error().Err(err).Msg("failed to create new user. error query")
+		return errors.New("failed to create new user. error query")
 	}
 	return nil
 }
