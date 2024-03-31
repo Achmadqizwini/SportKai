@@ -61,7 +61,7 @@ func (svc *userService) Get() ([]model.User, error) {
 	userData, err := svc.userRepository.Get()
 	if err != nil {
 		logService.Error().Err(err).Msg("failed to retrieve users")
-		return nil, err
+		return nil, errors.New("failed to retrieve users")
 	}
 	return userData, nil
 }
@@ -71,7 +71,7 @@ func (svc *userService) Update(input model.User, id string) (model.User, error) 
 	updatedUser, err := svc.userRepository.Update(input, id)
 	if err != nil {
 		logService.Error().Err(err).Msg("failed to update user")
-		return model.User{}, err
+		return model.User{}, errors.New("failed to update user: error query")
 	}
 	return updatedUser, nil
 }
@@ -81,7 +81,7 @@ func (svc *userService) Delete(id string) error {
 	err := svc.userRepository.Delete(id)
 	if err != nil {
 		logService.Error().Err(err).Msg("failed to delete user")
-		return err
+		return errors.New("failed to delete user: error query")
 	}
 	return nil
 }
@@ -91,7 +91,7 @@ func (svc *userService) GetById(id string) (model.User, error) {
 	res, err := svc.userRepository.GetById(id)
 	if err != nil {
 		logService.Error().Err(err).Msg("failed to get user by id")
-		return model.User{}, err
+		return model.User{}, errors.New("failed to get user by id: error query")
 	}
 	return res, nil
 }
