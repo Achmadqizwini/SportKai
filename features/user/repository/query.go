@@ -47,7 +47,7 @@ func (repo *userRepository) Create(input model.User) (err error) {
 // Get implements RepositoryInterface.
 func (repo *userRepository) Get() ([]model.User, error) {
 	userData := []model.User{}
-	rows, err := repo.db.Query(`select public_id, fullname, email, phone, gender, created_at, updated_at from "user"`)
+	rows, err := repo.db.Query(`SELECT public_id, fullname, email, phone, gender, created_at, updated_at FROM "user"`)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,8 @@ func (repo *userRepository) Get() ([]model.User, error) {
 
 // Update implements RepositoryInterface.
 func (repo *userRepository) Update(input model.User, id string) (model.User, error) {
-	stmt, err := repo.db.Prepare("UPDATE user SET fullname=?, email=?, password=?, phone=?, gender=? WHERE public_id=?")
+	stmt, err := repo.db.Prepare(`
+	UPDATE "user" SET fullname=$1, email=$2, password=$3, phone=$4, gender=$5 WHERE public_id=$6`)
 	if err != nil {
 		return model.User{}, err
 	}
@@ -82,7 +83,7 @@ func (repo *userRepository) Update(input model.User, id string) (model.User, err
 	}
 
 	userData := model.User{}
-	row := repo.db.QueryRow("SELECT public_id, fullname, email, phone, gender FROM user WHERE public_id=?", id)
+	row := repo.db.QueryRow(`SELECT public_id, fullname, email, phone, gender FROM "user" WHERE public_id=$1`, id)
 
 	err = row.Scan(&userData.PublicId, &userData.FullName, &userData.Email, &userData.Phone, &userData.Gender)
 	if err != nil {
@@ -94,7 +95,7 @@ func (repo *userRepository) Update(input model.User, id string) (model.User, err
 
 // Delete implements RepositoryInterface.
 func (repo *userRepository) Delete(id string) error {
-	stmt, errPrepare := repo.db.Prepare("DELETE FROM user WHERE public_id = ?")
+	stmt, errPrepare := repo.db.Prepare(`DELETE FROM "user" WHERE public_id = $1`)
 	if errPrepare != nil {
 		return errPrepare
 	}
@@ -114,7 +115,7 @@ func (repo *userRepository) Delete(id string) error {
 // GetById implements RepositoryInterface.
 func (repo *userRepository) GetById(id string) (model.User, error) {
 	userData := model.User{}
-	row := repo.db.QueryRow("select public_id, fullname, email, phone, gender from user where public_id=?", id)
+	row := repo.db.QueryRow(`SELECT public_id, fullname, email, phone, gender FROM "user" WHERE public_id=$1`, id)
 
 	err := row.Scan(&userData.PublicId, &userData.FullName, &userData.Email, &userData.Phone, &userData.Gender)
 	if err != nil {
