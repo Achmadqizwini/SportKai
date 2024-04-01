@@ -53,7 +53,7 @@ func (c *clubService) Create(input model.Club, user_id string) error {
 		Status:   "Owner",
 	}
 	if err := c.memberRepository.Create(memberInput); err != nil {
-		logService.Error().Err(err).Msg("failed to create new club")
+		logService.Error().Err(err).Msg("failed to create new member")
 		return err
 	}
 	return nil

@@ -2,9 +2,6 @@ package repository
 
 import (
 	"database/sql"
-	"errors"
-	"github.com/Achmadqizwini/SportKai/utils/logger"
-
 	model "github.com/Achmadqizwini/SportKai/features/clubMember/model"
 )
 
@@ -26,8 +23,6 @@ func New(db *sql.DB) RepositoryInterface {
 	}
 }
 
-var logRepo = logger.NewLogger().Logger.With().Logger()
-
 // Create implements RepositoryInterface.
 func (u *memberRepository) Create(input model.MemberPayload) error {
 	type ID struct {
@@ -37,22 +32,24 @@ func (u *memberRepository) Create(input model.MemberPayload) error {
 	var id ID
 	err := u.db.QueryRow(`
 		SELECT u.id AS user_id, c.id AS club_id 
-		FROM user u 
-		JOIN club c ON u.public_id = ? AND c.public_id = ?
+		FROM "user" u 
+		JOIN club c ON u.public_id = $1 AND c.public_id = $2
 	`, input.UserId, input.ClubId).Scan(&id.UserId, &id.ClubId)
 	if err != nil {
-		return errors.New("error query statement")
+		return err
 	}
-	stmt, errPrepare := u.db.Prepare("INSERT INTO club_member (public_id, user_id, club_id, status) VALUES (?, ?, ?, ?)")
+	stmt, errPrepare := u.db.Prepare(`
+		INSERT INTO club_member (public_id, user_id, club_id, status) 
+		VALUES ($1, $2, $3, $4)
+	`)
 	if errPrepare != nil {
-		return errors.New("error prepare query statement")
+		return errPrepare
 	}
 	defer stmt.Close()
 
 	_, errExec := stmt.Exec(input.PublicId, id.UserId, id.ClubId, input.Status)
 	if errExec != nil {
-		logRepo.Error().Err(errExec).Msg("error query execution")
-		return errors.New("error query execution")
+		return errExec
 	}
 
 	return nil
@@ -60,18 +57,18 @@ func (u *memberRepository) Create(input model.MemberPayload) error {
 
 // Delete implements RepositoryInterface.
 func (u *memberRepository) Delete(id string) error {
-	stmt, errPrepare := u.db.Prepare("DELETE FROM club_member WHERE public_id = ?")
+	stmt, errPrepare := u.db.Prepare(`DELETE FROM club_member WHERE public_id = $1`)
 	if errPrepare != nil {
-		return errors.New("error prepare query statement")
+		return errPrepare
 	}
 	defer stmt.Close()
 
 	res, errExec := stmt.Exec(id)
 	if errExec != nil {
-		return errors.New("error query deletion")
+		return errExec
 	}
 	if row, err := res.RowsAffected(); row == 0 || err != nil {
-		return errors.New("no member found")
+		return err
 	}
 
 	return nil
@@ -80,9 +77,9 @@ func (u *memberRepository) Delete(id string) error {
 // Get implements RepositoryInterface.
 func (u *memberRepository) Get() ([]model.MemberPayload, error) {
 	members := []model.MemberPayload{}
-	rows, err := u.db.Query("select id, public_id, user_id, club_id, status, joined_at, left_at from club_member")
+	rows, err := u.db.Query("SELECT id, public_id, user_id, club_id, status, joined_at, left_at FROM club_member")
 	if err != nil {
-		return nil, errors.New("error query")
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -90,7 +87,7 @@ func (u *memberRepository) Get() ([]model.MemberPayload, error) {
 		var u model.MemberPayload
 		err := rows.Scan(&u.ID, &u.PublicId, &u.UserId, &u.ClubId, &u.Status, &u.JoinedAt, &u.LeftAt)
 		if err != nil {
-			return nil, errors.New("error parsing data to model")
+			return nil, err
 		}
 		members = append(members, u)
 	}
@@ -101,32 +98,32 @@ func (u *memberRepository) Get() ([]model.MemberPayload, error) {
 // GetById implements RepositoryInterface.
 func (u *memberRepository) GetById(id string) (model.MemberPayload, error) {
 	memberData := model.MemberPayload{}
-	row := u.db.QueryRow("SELECT m.public_id, u.public_id as user_id, c.public_id AS club_id, m.status, m.joined_at "+
-		"FROM club_member m "+
-		"JOIN user u ON m.user_id = u.id "+
-		"JOIN club c ON m.club_id = c.id "+
-		"WHERE m.public_id=?", id)
+	row := u.db.QueryRow(`SELECT m.public_id, u.public_id as user_id, c.public_id AS club_id, m.status, m.joined_at
+		FROM club_member m
+		JOIN "user" u ON m.user_id = u.id
+		JOIN club c ON m.club_id = c.id
+		WHERE m.public_id=$1`, id)
 	err := row.Scan(&memberData.PublicId, &memberData.UserId, &memberData.ClubId, &memberData.Status, &memberData.JoinedAt)
 	if err != nil {
-		return model.MemberPayload{}, errors.New("error parsing data to model")
+		return model.MemberPayload{}, err
 	}
 	return memberData, nil
 }
 
 // Update implements RepositoryInterface.
 func (u *memberRepository) Update(input model.ClubMember, id string) error {
-	stmt, err := u.db.Prepare("UPDATE club_member SET status=? WHERE public_id=?")
+	stmt, err := u.db.Prepare("UPDATE club_member SET status=$1 WHERE public_id=$2")
 	if err != nil {
-		return errors.New("error query prepare statement")
+		return err
 	}
 	defer stmt.Close()
 
 	result, errExec := stmt.Exec(input.Status, id)
 	if errExec != nil {
-		return errors.New("error query execution")
+		return errExec
 	}
 	if row, err := result.RowsAffected(); row == 0 || err != nil {
-		return errors.New("update failed, no rows affected")
+		return err
 	}
 
 	return nil
