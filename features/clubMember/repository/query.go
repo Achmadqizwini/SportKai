@@ -7,9 +7,9 @@ import (
 
 type RepositoryInterface interface {
 	Create(input model.MemberPayload) error
-	Get() ([]model.MemberPayload, error)
-	GetById(id string) (model.MemberPayload, error)
-	Update(input model.ClubMember, id string) error
+	Get(club_id string) ([]model.MemberPayload, error)
+	GetById(club_id, id string) (model.MemberPayload, error)
+	Update(input model.MemberPayload, id string) error
 	Delete(id string) error
 }
 
@@ -75,9 +75,12 @@ func (u *memberRepository) Delete(id string) error {
 }
 
 // Get implements RepositoryInterface.
-func (u *memberRepository) Get() ([]model.MemberPayload, error) {
+func (u *memberRepository) Get(club_id string) ([]model.MemberPayload, error) {
 	members := []model.MemberPayload{}
-	rows, err := u.db.Query("SELECT id, public_id, user_id, club_id, status, joined_at, left_at FROM club_member")
+	rows, err := u.db.Query(`
+	SELECT m.id, m.public_id, m.user_id, m.club_id, m.status, m.joined_at, m.left_at FROM club_member m
+	LEFT JOIN club c ON m.club_id = c.public_id
+	WHERE c.public_id = $1`, club_id)
 	if err != nil {
 		return nil, err
 	}
@@ -96,13 +99,13 @@ func (u *memberRepository) Get() ([]model.MemberPayload, error) {
 }
 
 // GetById implements RepositoryInterface.
-func (u *memberRepository) GetById(id string) (model.MemberPayload, error) {
+func (u *memberRepository) GetById(club_id, id string) (model.MemberPayload, error) {
 	memberData := model.MemberPayload{}
 	row := u.db.QueryRow(`SELECT m.public_id, u.public_id as user_id, c.public_id AS club_id, m.status, m.joined_at
 		FROM club_member m
 		JOIN "user" u ON m.user_id = u.id
 		JOIN club c ON m.club_id = c.id
-		WHERE m.public_id=$1`, id)
+		WHERE m.public_id=$1 AND c.public_id=$2`, id, club_id)
 	err := row.Scan(&memberData.PublicId, &memberData.UserId, &memberData.ClubId, &memberData.Status, &memberData.JoinedAt)
 	if err != nil {
 		return model.MemberPayload{}, err
@@ -111,7 +114,7 @@ func (u *memberRepository) GetById(id string) (model.MemberPayload, error) {
 }
 
 // Update implements RepositoryInterface.
-func (u *memberRepository) Update(input model.ClubMember, id string) error {
+func (u *memberRepository) Update(input model.MemberPayload, id string) error {
 	stmt, err := u.db.Prepare("UPDATE club_member SET status=$1 WHERE public_id=$2")
 	if err != nil {
 		return err

@@ -20,10 +20,10 @@ func New(service svc.ServiceInterface, r *http.ServeMux) {
 	}
 
 	r.HandleFunc("POST /members", handler.CreateMember)
-	r.HandleFunc("GET /members", handler.GetMember)
+	r.HandleFunc("GET /members/{club_id}", handler.GetMember)
 	r.HandleFunc("PUT /members/{id}", handler.UpdateMember)
 	r.HandleFunc("DELETE /members/{id}", handler.DeleteMember)
-	r.HandleFunc("GET /members/{id}", handler.GetMemberById)
+	r.HandleFunc("GET /members/{club_id}/member/{id}", handler.GetMemberById)
 
 }
 
@@ -63,7 +63,8 @@ func (delivery *MemberDelivery) CreateMember(w http.ResponseWriter, r *http.Requ
 }
 
 func (delivery *MemberDelivery) GetMember(w http.ResponseWriter, r *http.Request) {
-	members, err := delivery.memberService.Get()
+	club_id := r.PathValue("club_id")
+	members, err := delivery.memberService.Get(club_id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(helper.FailedResponse("failed to retrieve club members"))
@@ -76,7 +77,7 @@ func (delivery *MemberDelivery) GetMember(w http.ResponseWriter, r *http.Request
 
 func (delivery *MemberDelivery) UpdateMember(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	var memberInput model.ClubMember
+	var memberInput model.MemberPayload
 	var err error
 	contentType := r.Header.Get("Content-Type")
 	if strings.HasPrefix(contentType, "application/json") {
@@ -85,6 +86,7 @@ func (delivery *MemberDelivery) UpdateMember(w http.ResponseWriter, r *http.Requ
 		err = r.ParseForm()
 		if err == nil {
 			memberInput.Status = r.Form.Get("status")
+			memberInput.ClubId = r.Form.Get("club_id")
 
 		}
 	} else {
@@ -111,7 +113,8 @@ func (delivery *MemberDelivery) UpdateMember(w http.ResponseWriter, r *http.Requ
 
 func (delivery *MemberDelivery) GetMemberById(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	res, err := delivery.memberService.GetById(id)
+	club_id := r.PathValue("club_id")
+	res, err := delivery.memberService.GetById(club_id, id)
 	memberData := getMemberResponse(res)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

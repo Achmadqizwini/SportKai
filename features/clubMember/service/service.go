@@ -10,9 +10,9 @@ import (
 
 type ServiceInterface interface {
 	Create(input model.MemberPayload) error
-	Get() ([]model.MemberPayload, error)
-	GetById(id string) (model.MemberPayload, error)
-	Update(input model.ClubMember, id string) (model.MemberPayload, error)
+	Get(club_id string) ([]model.MemberPayload, error)
+	GetById(club_id, id string) (model.MemberPayload, error)
+	Update(input model.MemberPayload, id string) (model.MemberPayload, error)
 	Delete(id string) error
 }
 
@@ -55,8 +55,8 @@ func (c *memberService) Delete(id string) error {
 }
 
 // Get implements ServiceInterface.
-func (c *memberService) Get() ([]model.MemberPayload, error) {
-	member, err := c.memberRepository.Get()
+func (c *memberService) Get(club_id string) ([]model.MemberPayload, error) {
+	member, err := c.memberRepository.Get(club_id)
 	if err != nil {
 		logService.Error().Err(err).Msg("failed to retrieve club member")
 		return nil, err
@@ -65,8 +65,8 @@ func (c *memberService) Get() ([]model.MemberPayload, error) {
 }
 
 // GetById implements ServiceInterface.
-func (c *memberService) GetById(id string) (model.MemberPayload, error) {
-	res, err := c.memberRepository.GetById(id)
+func (c *memberService) GetById(club_id, id string) (model.MemberPayload, error) {
+	res, err := c.memberRepository.GetById(club_id, id)
 	if err != nil {
 		logService.Error().Err(err).Msg("failed to get member by id")
 		return model.MemberPayload{}, err
@@ -75,13 +75,14 @@ func (c *memberService) GetById(id string) (model.MemberPayload, error) {
 }
 
 // Update implements ServiceInterface.
-func (c *memberService) Update(input model.ClubMember, id string) (model.MemberPayload, error) {
+func (c *memberService) Update(input model.MemberPayload, id string) (model.MemberPayload, error) {
 	err := c.memberRepository.Update(input, id)
 	if err != nil {
 		logService.Error().Err(err).Msg("failed to update club member")
 		return model.MemberPayload{}, err
 	}
-	updatedMember, err := c.memberRepository.GetById(id)
+	// need more handling
+	updatedMember, err := c.memberRepository.GetById(input.ClubId, id)
 	if err != nil {
 		logService.Error().Err(err).Msg("failed to retrieve updated member")
 		return model.MemberPayload{}, err
