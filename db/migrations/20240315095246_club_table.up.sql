@@ -24,5 +24,5 @@ CREATE TABLE club_member (
     joined_at   TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     left_at     TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES "user" (id),
-    FOREIGN KEY (club_id) REFERENCES club (id)
+    FOREIGN KEY (club_id) REFERENCES club (id) ON DELETE CASCADE
 )
