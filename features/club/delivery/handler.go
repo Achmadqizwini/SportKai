@@ -106,7 +106,7 @@ func (delivery *ClubDelivery) DeleteClub(w http.ResponseWriter, r *http.Request)
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(helper.SuccessResponse("Success remove delete club"))
+	json.NewEncoder(w).Encode(helper.SuccessResponse("Success delete club"))
 }
 
 func (delivery *ClubDelivery) UpdateClub(w http.ResponseWriter, r *http.Request) {
